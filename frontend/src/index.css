@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/* Base layout & reusable helper classes for sub-routes */
+.page {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+.page h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+  background-color: #059669;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  transition: all 150ms ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+.btn:hover {
+  background-color: #047857;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 150ms ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+  text-decoration: none;
+}
+.btn-secondary:hover {
+  background-color: #e2e8f0;
+}
+
+.input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  background-color: #ffffff;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+}
+.input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+}

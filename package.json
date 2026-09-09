@@ -1,0 +1,15 @@
+{
+  "name": "agriprocure",
+  "version": "1.0.0",
+  "description": "AgriProcure - Decentralized Agricultural Procurement & Farmer Portal",
+  "private": true,
+  "main": "start.js",
+  "scripts": {
+    "dev": "node start.js",
+    "start": "node start.js",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "seed": "npm --prefix backend run dev -- src/seed.js"
+  }
+}

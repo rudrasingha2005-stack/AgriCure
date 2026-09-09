@@ -1,0 +1,22 @@
+const router = require('express').Router();
+const { protect, authorize } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
+const c = require('../controllers/farmerController');
+
+router.use(protect, authorize('farmer'));
+router.get('/profile', c.getProfile);
+router.get('/dashboard', c.getDashboard);
+router.get('/saved-crops', c.getSavedCrops);
+router.post('/saved-crops', c.saveCrop);
+router.delete('/saved-crops/:cropId', c.deleteSavedCrop);
+router.get('/transactions', c.getTransactions);
+router.get('/payments/:bookingId', c.getPaymentByBooking);
+router.get('/receipts/:bookingId', c.getReceipt);
+router.get('/quality/:bookingId', c.getQualityReport);
+router.get('/weather/:bookingId', c.getWeather);
+router.get('/price-trends', c.getPriceTrend);
+router.get('/announcements', c.getAnnouncements);
+router.post('/feedback', c.submitFeedback);
+router.post('/allegations', upload.single('proof'), c.submitAllegation);
+router.post('/ai-scan', upload.single('cropImage'), c.scanCropQuality);
+module.exports = router;
