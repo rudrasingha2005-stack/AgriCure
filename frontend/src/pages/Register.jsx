@@ -65,30 +65,36 @@ export default function Register() {
   // --- Step 3: Farm / Profile Details ---
   const [farmDetails, setFarmDetails] = useState({
     farmerId: `FMR-2026-${String(Math.floor(100000 + Math.random() * 900000))}`,
-    farmArea: '',
+    farmArea: '2.5',
     landType: 'Owned',
-    mainCrops: ['Wheat', 'Potato'],
-    otherCrop: '',
-    expectedQuantity: ''
+    khatianNo: '1245/A',
+    dagNo: '782',
+    mouza: 'Matigara',
+    jlNo: '45',
+    parchaUploaded: true,
+    mainCrops: ['Paddy', 'Wheat'],
+    expectedQuantity: '50'
   });
 
-  // Company Details (if role === 'company')
+  // Company Details (Govt Admin)
   const [companyDetails, setCompanyDetails] = useState({
-    companyName: '',
-    gstin: '',
-    cin: '',
-    businessType: 'Food Processor',
-    procurementCategories: ['Grains & Cereals'],
-    storageCapacity: ''
+    department: 'Food Corporation of India / Dept of Agriculture',
+    designation: 'Senior Procurement Admin',
+    officialEmail: 'admin.fci@gov.in',
+    employeeId: 'GOV-WB-90812',
+    postingDistrict: 'Darjeeling',
+    businessType: 'Govt Procurement Authority',
+    storageCapacity: '5000 MT'
   });
 
-  // Professional Details (if role === 'professional')
+  // Professional Details (Procurement Agent)
   const [proDetails, setProDetails] = useState({
-    qualification: '',
-    licenseId: '',
-    specialization: 'Quality Inspection & Grading',
-    organization: '',
-    experienceYears: ''
+    agencyName: 'W.B. State Agricultural Marketing Board',
+    licenseId: 'APMC-LIC-2026-9901',
+    assignedCentre: 'ABC Procurement Centre - Siliguri Hub',
+    officialEmail: 'agent.siliguri@agrisetu.gov.in',
+    qualification: 'B.Sc Agriculture / Certified Quality Assessor',
+    experienceYears: '8 Years'
   });
 
   // --- Step 4: Bank / Payment Details ---
@@ -977,7 +983,7 @@ export default function Register() {
                             })
                           }
                           title="Generate new ID"
-                          className="p-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-600"
+                          className="p-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-600 cursor-pointer"
                         >
                           <RefreshCw className="w-4 h-4" />
                         </button>
@@ -987,168 +993,264 @@ export default function Register() {
                       </p>
                     </div>
 
-                    {/* Total Farm Area & Land Type */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">Total Farm Area</label>
-                        <div className="relative">
+                    {/* PARCHA LAND RECORD SECTION */}
+                    <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-300 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-emerald-900 uppercase tracking-wide flex items-center gap-1.5">
+                          <span>📜</span> Land Record Details (Parcha)
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-700 text-white shadow-xs">
+                          Required for Quota Verification
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Khatian No.</label>
                           <input
-                            type="number"
-                            min="0"
-                            step="0.1"
-                            placeholder="e.g. 5"
-                            value={farmDetails.farmArea}
-                            onChange={(e) => setFarmDetails({ ...farmDetails, farmArea: e.target.value })}
-                            className="w-full p-2.5 pr-14 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            type="text"
+                            placeholder="e.g. 1245/A"
+                            value={farmDetails.khatianNo}
+                            onChange={(e) => setFarmDetails({ ...farmDetails, khatianNo: e.target.value })}
+                            className="w-full p-2 border border-slate-300 rounded-xl bg-white font-mono font-bold text-xs"
                           />
-                          <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-bold">Acre</span>
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Dag No.</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 782"
+                            value={farmDetails.dagNo}
+                            onChange={(e) => setFarmDetails({ ...farmDetails, dagNo: e.target.value })}
+                            className="w-full p-2 border border-slate-300 rounded-xl bg-white font-mono font-bold text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Mouza Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Matigara"
+                            value={farmDetails.mouza}
+                            onChange={(e) => setFarmDetails({ ...farmDetails, mouza: e.target.value })}
+                            className="w-full p-2 border border-slate-300 rounded-xl bg-white text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">JL No.</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 45"
+                            value={farmDetails.jlNo}
+                            onChange={(e) => setFarmDetails({ ...farmDetails, jlNo: e.target.value })}
+                            className="w-full p-2 border border-slate-300 rounded-xl bg-white font-mono font-bold text-xs"
+                          />
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">Land Type</label>
-                        <select
-                          value={farmDetails.landType}
-                          onChange={(e) => setFarmDetails({ ...farmDetails, landType: e.target.value })}
-                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
-                        >
-                          <option value="Owned">Owned</option>
-                          <option value="Leased">Leased</option>
-                          <option value="Other">Other</option>
-                        </select>
+                      {/* Land Area (Acres) & Auto Produce Quota */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Total Land Area (Acres)</label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="0.1"
+                              step="0.1"
+                              value={farmDetails.farmArea}
+                              onChange={(e) => {
+                                const area = e.target.value;
+                                setFarmDetails({
+                                  ...farmDetails,
+                                  farmArea: area,
+                                  expectedQuantity: String((parseFloat(area) || 0) * 20)
+                                });
+                              }}
+                              className="w-full p-2 pr-12 border border-slate-300 rounded-xl bg-white text-xs font-extrabold text-slate-900"
+                            />
+                            <span className="absolute right-2.5 top-2 text-[11px] font-bold text-slate-500">Acre</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Auto Produce Weight Quota</label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              readOnly
+                              value={`${(parseFloat(farmDetails.farmArea) || 0) * 20} Quintals`}
+                              className="w-full p-2 border border-emerald-300 bg-emerald-100/70 rounded-xl text-xs font-black text-emerald-950"
+                            />
+                          </div>
+                          <p className="text-[10px] text-emerald-800 font-medium mt-0.5">
+                            * Calculated at 20 Quintals / Acre as per government norms.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Upload Parcha Simulation */}
+                      <div className="pt-2">
+                        <label className="block font-bold text-slate-700 mb-1">Upload Parcha Document (.pdf / .jpg)</label>
+                        <div className="flex items-center gap-3">
+                          <label className="cursor-pointer bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs shadow-xs transition-all flex items-center gap-1.5">
+                            <span>📄</span>
+                            <span>{farmDetails.parchaUploaded ? 'Parcha Attached ✓' : 'Upload Parcha File'}</span>
+                          </label>
+                          <span className="text-[11px] text-emerald-900 font-mono font-bold">
+                            {farmDetails.parchaUploaded ? 'parcha_land_record_wb.pdf (Verified)' : 'No file chosen'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Main Products / Crops (Checkboxes per PDF) */}
+                    {/* Main Products / Crops (Strictly Paddy & Wheat) */}
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Main Products / Crops <span className="text-red-500">*</span>
+                        Main Crops Authorized <span className="text-red-500">*</span>
                       </label>
-                      <p className="text-[11px] text-slate-500 mb-2.5">
-                        What do you produce? (Select all that apply)
+                      <p className="text-[11px] text-slate-500 mb-2">
+                        State procurement quota is restricted exclusively to Paddy and Wheat.
                       </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        {['Potato', 'Rice', 'Wheat', 'Maize', 'Tomato', 'Onion', 'Vegetables', 'Other'].map(
-                          (crop) => (
-                            <label
-                              key={crop}
-                              className={`p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all flex items-center gap-2 ${
-                                farmDetails.mainCrops.includes(crop)
-                                  ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
-                                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                              }`}
-                            >
+                      <div className="grid grid-cols-2 gap-3">
+                        {['Paddy', 'Wheat'].map((crop) => (
+                          <label
+                            key={crop}
+                            className={`p-3 rounded-xl border text-xs font-black cursor-pointer transition-all flex items-center justify-between ${
+                              farmDetails.mainCrops.includes(crop)
+                                ? 'border-emerald-600 bg-emerald-60 text-emerald-900 shadow-xs'
+                                : 'border-slate-200 bg-white text-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
                               <input
                                 type="checkbox"
                                 checked={farmDetails.mainCrops.includes(crop)}
-                                onChange={() => toggleCrop(crop)}
+                                onChange={() => {
+                                  if (farmDetails.mainCrops.includes(crop)) {
+                                    if (farmDetails.mainCrops.length > 1) {
+                                      setFarmDetails({
+                                        ...farmDetails,
+                                        mainCrops: farmDetails.mainCrops.filter((c) => c !== crop)
+                                      });
+                                    }
+                                  } else {
+                                    setFarmDetails({
+                                      ...farmDetails,
+                                      mainCrops: [...farmDetails.mainCrops, crop]
+                                    });
+                                  }
+                                }}
                                 className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                               />
-                              <span>{crop}</span>
-                            </label>
-                          )
-                        )}
+                              <span>{crop === 'Paddy' ? '🌾 Paddy (Dhan)' : '🌾 Wheat (Gehun)'}</span>
+                            </div>
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                              Eligible
+                            </span>
+                          </label>
+                        ))}
                       </div>
-                    </div>
-
-                    {/* Expected Procurement Quantity (Optional per PDF Page 4) */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Expected Production / Quantity (Optional)
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          placeholder="e.g. 5000"
-                          value={farmDetails.expectedQuantity}
-                          onChange={(e) => setFarmDetails({ ...farmDetails, expectedQuantity: e.target.value })}
-                          className="w-full p-2.5 pr-12 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                        />
-                        <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-bold">kg</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-1">
-                        This can later help the system plan procurement capacity.
-                      </p>
                     </div>
                   </div>
                 ) : role === 'company' ? (
-                  /* Company Details */
+                  /* Govt Admin Official Details */
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Company Legal Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. AgroProcure India Pvt Ltd"
-                        value={companyDetails.companyName}
-                        onChange={(e) => setCompanyDetails({ ...companyDetails, companyName: e.target.value })}
-                        className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 space-y-3">
+                      <span className="text-xs font-black text-blue-900 uppercase tracking-wide block">
+                        🏛️ Government Authority Details
+                      </span>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">GSTIN</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Department / Ministry</label>
                         <input
                           type="text"
-                          placeholder="15-digit GSTIN"
-                          value={companyDetails.gstin}
-                          onChange={(e) => setCompanyDetails({ ...companyDetails, gstin: e.target.value })}
-                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500"
+                          required
+                          value={companyDetails.department}
+                          onChange={(e) => setCompanyDetails({ ...companyDetails, department: e.target.value })}
+                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-bold bg-white"
                         />
                       </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Official Designation</label>
+                          <input
+                            type="text"
+                            required
+                            value={companyDetails.designation}
+                            onChange={(e) => setCompanyDetails({ ...companyDetails, designation: e.target.value })}
+                            className="w-full p-2.5 border border-slate-300 rounded-xl text-sm bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Government Employee ID</label>
+                          <input
+                            type="text"
+                            required
+                            value={companyDetails.employeeId}
+                            onChange={(e) => setCompanyDetails({ ...companyDetails, employeeId: e.target.value })}
+                            className="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-mono font-bold bg-white"
+                          />
+                        </div>
+                      </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">Business Type</label>
-                        <select
-                          value={companyDetails.businessType}
-                          onChange={(e) => setCompanyDetails({ ...companyDetails, businessType: e.target.value })}
-                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm bg-white"
-                        >
-                          <option value="Food Processor">Food Processor</option>
-                          <option value="Exporter">Exporter</option>
-                          <option value="Retail Chain">Retail Chain</option>
-                          <option value="Agri Trader">Agri Trader</option>
-                        </select>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Official Govt Email (.gov.in)</label>
+                        <input
+                          type="email"
+                          required
+                          value={companyDetails.officialEmail}
+                          onChange={(e) => setCompanyDetails({ ...companyDetails, officialEmail: e.target.value })}
+                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-bold bg-white"
+                        />
                       </div>
                     </div>
                   </div>
                 ) : (
-                  /* Professional Details */
+                  /* Procurement Agent Official Details */
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Highest Qualification / Degree
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. M.Sc Agriculture / Quality Assessor"
-                        value={proDetails.qualification}
-                        onChange={(e) => setProDetails({ ...proDetails, qualification: e.target.value })}
-                        className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-purple-50/80 border border-purple-200 space-y-3">
+                      <span className="text-xs font-black text-purple-900 uppercase tracking-wide block">
+                        🛡️ Procurement Agent Credentials
+                      </span>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          License / Registration ID
-                        </label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Procurement Agency Name</label>
                         <input
                           type="text"
-                          placeholder="e.g. PRO-8823-AG"
-                          value={proDetails.licenseId}
-                          onChange={(e) => setProDetails({ ...proDetails, licenseId: e.target.value })}
-                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500"
+                          required
+                          value={proDetails.agencyName}
+                          onChange={(e) => setProDetails({ ...proDetails, agencyName: e.target.value })}
+                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-bold bg-white"
                         />
                       </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">APMC License ID</label>
+                          <input
+                            type="text"
+                            required
+                            value={proDetails.licenseId}
+                            onChange={(e) => setProDetails({ ...proDetails, licenseId: e.target.value })}
+                            className="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-mono font-bold bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Centre ID</label>
+                          <input
+                            type="text"
+                            readOnly
+                            value={proDetails.assignedCentre}
+                            className="w-full p-2.5 border border-purple-300 rounded-xl text-sm font-bold bg-purple-100/60 text-purple-900"
+                          />
+                        </div>
+                      </div>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">Specialization</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Official Agent Email</label>
                         <input
-                          type="text"
-                          placeholder="e.g. Grain Grading & Moisture Testing"
-                          value={proDetails.specialization}
-                          onChange={(e) => setProDetails({ ...proDetails, specialization: e.target.value })}
-                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-purple-500"
+                          type="email"
+                          required
+                          value={proDetails.officialEmail}
+                          onChange={(e) => setProDetails({ ...proDetails, officialEmail: e.target.value })}
+                          className="w-full p-2.5 border border-slate-300 rounded-xl text-sm font-bold bg-white"
                         />
                       </div>
                     </div>
@@ -1532,7 +1634,7 @@ export default function Register() {
 
             {/* Bottom Login Link */}
             <div className="p-4 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-600">
-              Already have an AgriProcure account?{' '}
+              Already have an AgriSetu account?{' '}
               <Link to="/login" className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
                 Log In Here
               </Link>

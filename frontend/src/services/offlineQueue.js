@@ -1,4 +1,4 @@
-const KEY = 'agriprocure_offline_actions';
+const KEY = 'agrisetu_offline_actions';
 export const queueOfflineAction = (action) => {
   const items = JSON.parse(localStorage.getItem(KEY) || '[]');
   items.push({ ...action, id: crypto.randomUUID(), createdAt: Date.now() });

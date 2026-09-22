@@ -22,15 +22,18 @@ import {
   FileCheck,
   Briefcase,
   Tractor,
-  Award
+  Award,
+  Globe
 } from 'lucide-react';
 import API from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import { LanguageContext } from '../context/LanguageContext';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, requestOtp, verifyOtp } = useContext(AuthContext);
+  const { language, setLanguage, t } = useContext(LanguageContext);
 
   // Active role for main hero login card ('farmer' | 'company' | 'professional')
   const [selectedRole, setSelectedRole] = useState('farmer');
@@ -40,7 +43,7 @@ export default function Login() {
 
   // Hero card inputs
   const [heroIdentifier, setHeroIdentifier] = useState('9876543210');
-  const [heroPassword, setHeroPassword] = useState('password123');
+  const [heroPassword, setHeroPassword] = useState('AgriSetu@2025');
   const [heroPhone, setHeroPhone] = useState('9876543210');
   const [heroOtp, setHeroOtp] = useState('');
   const [heroOtpSent, setHeroOtpSent] = useState(false);
@@ -89,7 +92,7 @@ export default function Login() {
       setHeroIdentifier('pro@test.com');
       setHeroPhone('9876543212');
     }
-    setHeroPassword('password123');
+    setHeroPassword('AgriSetu@2025');
     setHeroOtpSent(false);
     setHeroOtp('');
   };
@@ -246,113 +249,156 @@ export default function Login() {
   const activeColorClasses = {
     farmer: {
       accent: 'emerald',
-      border: 'border-emerald-600',
-      bgLight: 'bg-emerald-50',
-      btn: 'bg-emerald-600 hover:bg-emerald-700',
-      text: 'text-emerald-700',
-      ring: 'focus:ring-emerald-500'
+      border: 'border-emerald-400 ring-2 ring-emerald-400/40 bg-white/40',
+      iconBg: 'bg-emerald-500 text-white',
+      titleColor: 'text-emerald-900',
+      subtitleColor: 'text-emerald-800',
+      badgeText: t('farmerAccountLoaded')
     },
     company: {
       accent: 'blue',
-      border: 'border-blue-600',
-      bgLight: 'bg-blue-50',
-      btn: 'bg-blue-600 hover:bg-blue-700',
-      text: 'text-blue-700',
-      ring: 'focus:ring-blue-500'
+      border: 'border-blue-400 ring-2 ring-blue-400/40 bg-white/40',
+      iconBg: 'bg-blue-500 text-white',
+      titleColor: 'text-blue-900',
+      subtitleColor: 'text-blue-800',
+      badgeText: t('governmentAccountLoaded')
     },
     professional: {
       accent: 'purple',
-      border: 'border-purple-600',
-      bgLight: 'bg-purple-50',
-      btn: 'bg-purple-600 hover:bg-purple-700',
-      text: 'text-purple-700',
-      ring: 'focus:ring-purple-500'
+      border: 'border-purple-400 ring-2 ring-purple-400/40 bg-white/40',
+      iconBg: 'bg-purple-500 text-white',
+      titleColor: 'text-purple-900',
+      subtitleColor: 'text-purple-800',
+      badgeText: t('professionalAccountLoaded')
     }
   }[selectedRole];
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-800">
+    <div
+      className="min-h-screen font-sans text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-800 relative flex flex-col justify-between overflow-x-hidden"
+      style={{
+        backgroundImage: `radial-gradient(circle at 90% 40%, rgba(255, 237, 160, 0.45) 0%, rgba(254, 215, 170, 0.25) 25%, transparent 55%), radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 45%), linear-gradient(180deg, rgba(240, 253, 244, 0.2) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(220, 252, 231, 0.25) 100%), url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=2400&q=85')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center 35%',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Natural depth overlay */}
+      <div className="absolute inset-0 bg-white/10 backdrop-blur-[0.5px] pointer-events-none" />
+
       {/* ========================================================================= */}
-      {/* 1. TOP HEADER                                                             */}
+      {/* 1. TOP HEADER - EXACT MATCH TO SCREENSHOT                                 */}
       {/* ========================================================================= */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 md:px-10 py-3 shadow-sm transition-all">
+      <header className="relative z-40 px-4 sm:px-8 md:px-12 py-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          
           {/* Logo & Tagline */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-200">
-              <Sprout className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-950 via-teal-900 to-emerald-900 border-2 border-amber-400/70 p-0.5 shadow-lg shadow-emerald-900/40 flex items-center justify-center overflow-hidden">
+              <img
+                src="/agriprocure-logo.png"
+                alt="AgriProcure Emblem Logo"
+                className="w-full h-full object-contain hover:scale-105 transition-transform"
+              />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-2xl font-black tracking-tight text-slate-900 leading-none">
-                  Agri<span className="text-emerald-600">Procure</span>
-                </span>
-              </div>
-              <p className="text-[11px] font-medium text-slate-500 tracking-normal mt-0.5">
-                Direct Farm-to-Company Platform
+              <span className="text-2xl font-black tracking-tight text-slate-900 leading-none">
+                Agri<span className="text-emerald-700">Setu</span>
+              </span>
+              <p className="text-[11px] font-medium text-slate-700 tracking-normal mt-0.5">
+                {t('directPlatform')}
               </p>
             </div>
           </div>
 
-          {/* Value Props / Trust Highlights */}
-          <div className="flex items-center gap-4 sm:gap-8 text-xs">
-            {/* Value Prop 1 */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
-                <ShieldCheck className="w-4 h-4" />
+          {/* Right Header Badges: Language Selector + Verified Badges */}
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            
+            {/* Language Capsule Pill */}
+            <div className="flex items-center bg-white/45 backdrop-blur-md p-1 rounded-full border border-white/60 shadow-xs">
+              <Globe className="w-3.5 h-3.5 text-slate-600 ml-2 mr-1" />
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-3 py-1 rounded-full font-bold text-xs transition-all cursor-pointer ${
+                  language === 'en'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-slate-900'
+                }`}
+              >
+                English
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('bn')}
+                className={`px-2.5 py-1 rounded-full font-bold text-xs transition-all cursor-pointer ${
+                  language === 'bn'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-slate-900'
+                }`}
+              >
+                বাংলা
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('hi')}
+                className={`px-2.5 py-1 rounded-full font-bold text-xs transition-all cursor-pointer ${
+                  language === 'hi'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-700 hover:text-slate-900'
+                }`}
+              >
+                हिन्दी
+              </button>
+            </div>
+
+            {/* Verified Users Badge */}
+            <div className="hidden sm:flex items-center gap-2 bg-white/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/60 shadow-xs">
+              <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700">
+                <ShieldCheck className="w-3.5 h-3.5" />
               </div>
-              <div>
-                <span className="font-bold text-slate-800 block leading-tight">Verified Users</span>
-                <span className="text-[10px] text-slate-500">Trusted & Secure</span>
+              <div className="text-left">
+                <span className="font-extrabold text-slate-900 block text-xs leading-tight">{t('verifiedUsers')}</span>
+                <span className="text-[10px] text-slate-600 font-medium">{t('trustedSecure')}</span>
               </div>
             </div>
 
-            {/* Value Prop 2 */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
-                <GitFork className="w-4 h-4 rotate-90" />
+            {/* Direct Connection Badge */}
+            <div className="hidden sm:flex items-center gap-2 bg-white/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/60 shadow-xs">
+              <div className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700">
+                <GitFork className="w-3.5 h-3.5 rotate-90" />
               </div>
-              <div>
-                <span className="font-bold text-slate-800 block leading-tight">Direct Connection</span>
-                <span className="text-[10px] text-slate-500">No Middlemen</span>
+              <div className="text-left">
+                <span className="font-extrabold text-slate-900 block text-xs leading-tight">{t('directConnection')}</span>
+                <span className="text-[10px] text-slate-600 font-medium">{t('noMiddlemen')}</span>
               </div>
             </div>
 
-            {/* Value Prop 3 */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
-                <Tag className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="font-bold text-slate-800 block leading-tight">Fair & Transparent</span>
-                <span className="text-[10px] text-slate-500">Better Prices</span>
-              </div>
-            </div>
           </div>
         </div>
       </header>
 
       {/* Global Alerts / Toasts */}
       {(errorBanner || successBanner) && (
-        <div className="max-w-4xl mx-auto px-4 pt-4">
+        <div className="max-w-4xl mx-auto px-4 pt-1 z-30 w-full">
           {errorBanner && (
-            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center justify-between shadow-sm animate-fade-in">
+            <div className="p-3.5 rounded-2xl bg-red-50/90 backdrop-blur-md border border-red-200 text-red-700 text-sm flex items-center justify-between shadow-md animate-fade-in">
               <div className="flex items-center gap-2">
                 <span>⚠️</span>
                 <span>{errorBanner}</span>
               </div>
-              <button onClick={() => setErrorBanner('')} className="text-red-400 hover:text-red-600">
+              <button onClick={() => setErrorBanner('')} className="text-red-400 hover:text-red-600 cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
           )}
           {successBanner && (
-            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between shadow-sm animate-fade-in">
+            <div className="p-3.5 rounded-2xl bg-emerald-50/90 backdrop-blur-md border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between shadow-md animate-fade-in">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>{successBanner}</span>
               </div>
-              <button onClick={() => setSuccessBanner('')} className="text-emerald-500 hover:text-emerald-700">
+              <button onClick={() => setSuccessBanner('')} className="text-emerald-500 hover:text-emerald-700 cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -361,510 +407,418 @@ export default function Login() {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. TOP HERO SECTION WITH AGRICULTURAL BACKDROP & FLOATING LOGIN CARD      */}
+      {/* 2. MAIN CENTER HERO SECTION (Exact Match to Screenshot)                   */}
       {/* ========================================================================= */}
-      <section className="relative px-4 py-8 md:py-14 overflow-hidden">
-        {/* Scenic Farm Background with Farmer & Tractor Atmosphere */}
-        <div
-          className="absolute inset-0 z-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(16, 50, 28, 0.78), rgba(22, 60, 35, 0.65), rgba(30, 45, 60, 0.7)), url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=2000&q=80')`
-          }}
-        >
-          {/* Subtle rural overlay details */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-black/20" />
-        </div>
+      <main className="relative z-10 px-4 sm:px-6 md:px-12 py-6 md:py-10 max-w-7xl mx-auto w-full my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center relative">
+          
+          {/* ===================================================================== */}
+          {/* LEFT COLUMN: Welcome Back, 3 Role Cards, Demo Fill, Trust Badges      */}
+          {/* ===================================================================== */}
+          <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
+            <div>
+              {/* Heading: Crystal Clear Vibrant Green Font */}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-800 tracking-tight flex items-center gap-2.5 drop-shadow-sm">
+                <span>{t('welcomeBack')}</span>
+              </h1>
+              {/* Subtitle: Crystal Clear Vibrant Green Font */}
+              <p className="text-sm sm:text-base font-extrabold text-emerald-700 mt-1">
+                {t('loginSubtitle')}
+              </p>
 
-        <div className="max-w-5xl mx-auto relative z-10">
-          {/* Main Dual-Column Floating Login Card */}
-          <div className="bg-white/98 backdrop-blur-md rounded-3xl shadow-2xl border border-white/60 overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-12">
-              {/* LEFT COLUMN: Role Selection & Welcome */}
-              <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-100 bg-gradient-to-b from-white to-slate-50/50">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                    Welcome Back! 👋
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">Login to continue to AgriProcure</p>
+              {/* Role Selection Container */}
+              <div className="mt-8">
+                {/* LOGIN AS Label: Crystal Clear Vibrant Green Font */}
+                <label className="text-[11px] font-black uppercase tracking-wider text-emerald-800 block mb-3">
+                  {t('loginAs')}
+                </label>
 
-                  <div className="mt-6">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-3">
-                      Login as
-                    </label>
-
-                    {/* 3 Role Selection Cards */}
-                    <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-                      {/* 1. Farmer */}
-                      <button
-                        type="button"
-                        onClick={() => handleRoleSelect('farmer')}
-                        className={`p-3 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-between group ${
-                          selectedRole === 'farmer'
-                            ? 'border-emerald-600 bg-emerald-50/70 shadow-md shadow-emerald-600/10'
-                            : 'border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/30'
-                        }`}
-                      >
-                        <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
-                            selectedRole === 'farmer' ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700'
-                          }`}
-                        >
-                          <span className="text-xl">👨‍🌾</span>
-                        </div>
-                        <div className="mt-2">
-                          <span
-                            className={`font-bold text-xs sm:text-sm block leading-tight ${
-                              selectedRole === 'farmer' ? 'text-emerald-800' : 'text-slate-800'
-                            }`}
-                          >
-                            Farmer
-                          </span>
-                          <span className="text-[10px] text-slate-500 block mt-0.5 leading-tight">Sell your produce</span>
-                        </div>
-                      </button>
-
-                      {/* 2. Company */}
-                      <button
-                        type="button"
-                        onClick={() => handleRoleSelect('company')}
-                        className={`p-3 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-between group ${
-                          selectedRole === 'company'
-                            ? 'border-blue-600 bg-blue-50/70 shadow-md shadow-blue-600/10'
-                            : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30'
-                        }`}
-                      >
-                        <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
-                            selectedRole === 'company' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'
-                          }`}
-                        >
-                          <Building2 className="w-6 h-6" />
-                        </div>
-                        <div className="mt-2">
-                          <span
-                            className={`font-bold text-xs sm:text-sm block leading-tight ${
-                              selectedRole === 'company' ? 'text-blue-800' : 'text-slate-800'
-                            }`}
-                          >
-                            Company
-                          </span>
-                          <span className="text-[10px] text-slate-500 block mt-0.5 leading-tight">
-                            Buy quality produce
-                          </span>
-                        </div>
-                      </button>
-
-                      {/* 3. Professional */}
-                      <button
-                        type="button"
-                        onClick={() => handleRoleSelect('professional')}
-                        className={`p-3 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-between group ${
-                          selectedRole === 'professional'
-                            ? 'border-purple-600 bg-purple-50/70 shadow-md shadow-purple-600/10'
-                            : 'border-slate-200 bg-white hover:border-purple-300 hover:bg-purple-50/30'
-                        }`}
-                      >
-                        <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
-                            selectedRole === 'professional'
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-purple-100 text-purple-700'
-                          }`}
-                        >
-                          <UserCheck className="w-6 h-6" />
-                        </div>
-                        <div className="mt-2">
-                          <span
-                            className={`font-bold text-xs sm:text-sm block leading-tight ${
-                              selectedRole === 'professional' ? 'text-purple-800' : 'text-slate-800'
-                            }`}
-                          >
-                            Professional
-                          </span>
-                          <span className="text-[10px] text-slate-500 block mt-0.5 leading-tight">
-                            Expert & Services
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-
-                    {/* Quick 1-Click Demo Fill Bar */}
-                    <div className="mt-5 p-2.5 rounded-xl bg-slate-100/90 border border-slate-200 text-xs flex flex-wrap items-center justify-between gap-1.5">
-                      <span className="text-slate-500 font-medium">Quick Demo Test:</span>
-                      <div className="flex gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => quickFill('farmer')}
-                          className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold hover:bg-emerald-200 text-[11px]"
-                        >
-                          Farmer
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => quickFill('company')}
-                          className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold hover:bg-blue-200 text-[11px]"
-                        >
-                          Company
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => quickFill('professional')}
-                          className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-semibold hover:bg-purple-200 text-[11px]"
-                        >
-                          Pro
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Left Bottom Security Note */}
-                <div className="mt-8 pt-4 border-t border-slate-200/80 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
-                      <Lock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-slate-800 block">Secure Login</span>
-                      <span className="text-[10px] text-slate-500">Your data is protected with encryption</span>
-                    </div>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-full">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    100% Safe
-                  </span>
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN: Role Login Form */}
-              <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-                      Login to your {selectedRole} account
-                    </h2>
-                    {heroLoginMode === 'otp' && (
-                      <button
-                        type="button"
-                        onClick={() => setHeroLoginMode('password')}
-                        className="text-xs text-slate-500 hover:text-slate-800 underline font-medium"
-                      >
-                        Use Password
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Password Login Mode */}
-                  {heroLoginMode === 'password' ? (
-                    <form onSubmit={handleHeroPasswordLogin} className="space-y-4">
-                      {/* Identifier Input */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          {selectedRole === 'farmer'
-                            ? 'Mobile Number / Email'
-                            : selectedRole === 'company'
-                            ? 'Email / Company Email'
-                            : 'Professional ID / Email'}
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            {selectedRole === 'farmer' ? (
-                              <Phone className="w-4 h-4" />
-                            ) : selectedRole === 'company' ? (
-                              <Mail className="w-4 h-4" />
-                            ) : (
-                              <User className="w-4 h-4" />
-                            )}
-                          </div>
-                          <input
-                            type="text"
-                            required
-                            placeholder={
-                              selectedRole === 'farmer'
-                                ? 'Enter Mobile Number / Email'
-                                : selectedRole === 'company'
-                                ? 'Enter Company Email'
-                                : 'Enter Professional ID or Email'
-                            }
-                            value={heroIdentifier}
-                            onChange={(e) => setHeroIdentifier(e.target.value)}
-                            className="w-full pl-10 pr-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Password Input */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            <Lock className="w-4 h-4" />
-                          </div>
-                          <input
-                            type={showHeroPassword ? 'text' : 'password'}
-                            required
-                            placeholder="Enter your password"
-                            value={heroPassword}
-                            onChange={(e) => setHeroPassword(e.target.value)}
-                            className="w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowHeroPassword(!showHeroPassword)}
-                            className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600"
-                          >
-                            {showHeroPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-
-                        {/* Forgot Password Link */}
-                        <div className="text-right mt-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setForgotModalOpen(true)}
-                            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
-                          >
-                            Forgot Password?
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Primary Login Button */}
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className={`w-full text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
-                          activeColorClasses.btn
-                        } ${loading ? 'opacity-70 cursor-wait' : ''}`}
-                      >
-                        <span>Login</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </form>
-                  ) : (
-                    /* OTP Login Mode */
-                    <form onSubmit={handleHeroVerifyOtp} className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Registered Mobile Number
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            <span className="text-xs font-bold text-slate-500">+91</span>
-                          </div>
-                          <input
-                            type="tel"
-                            maxLength={10}
-                            required
-                            placeholder="10-digit mobile number"
-                            value={heroPhone}
-                            onChange={(e) => setHeroPhone(e.target.value)}
-                            className="w-full pl-12 pr-28 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                          />
-                          <button
-                            type="button"
-                            onClick={handleHeroRequestOtp}
-                            disabled={loading}
-                            className="absolute right-1.5 top-1.5 bottom-1.5 px-3 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-xs hover:bg-emerald-100 transition-colors border border-emerald-200"
-                          >
-                            {heroOtpSent ? 'Resend' : 'Send OTP'}
-                          </button>
-                        </div>
-                      </div>
-
-                      {heroOtpSent && (
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-700 mb-1">Enter 6-Digit OTP</label>
-                          <div className="relative">
-                            <Smartphone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-                            <input
-                              type="text"
-                              maxLength={6}
-                              required
-                              placeholder="Enter received OTP"
-                              value={heroOtp}
-                              onChange={(e) => setHeroOtp(e.target.value)}
-                              className="w-full pl-10 pr-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            />
-                          </div>
-                          {heroDemoOtp && (
-                            <p className="text-[11px] text-emerald-700 mt-1">Demo code auto-filled: {heroDemoOtp}</p>
-                          )}
-                        </div>
-                      )}
-
-                      <button
-                        type="submit"
-                        disabled={loading || !heroOtpSent}
-                        className={`w-full text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
-                          activeColorClasses.btn
-                        } ${loading || !heroOtpSent ? 'opacity-70 cursor-not-allowed' : ''}`}
-                      >
-                        <span>Verify & Login</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </form>
-                  )}
-
-                  {/* OR Divider */}
-                  <div className="relative my-4 text-center">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-slate-200"></div>
-                    </div>
-                    <span className="relative bg-white px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      OR
-                    </span>
-                  </div>
-
-                  {/* Login with OTP Button */}
+                {/* 3 Role Cards */}
+                <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                  
+                  {/* Card 1: Farmer */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setHeroLoginMode(heroLoginMode === 'password' ? 'otp' : 'password');
-                      setErrorBanner('');
-                    }}
-                    className="w-full border-2 border-emerald-600 text-emerald-800 font-bold py-2.5 px-4 rounded-xl hover:bg-emerald-50/60 transition-all flex items-center justify-center gap-2 text-sm"
+                    onClick={() => handleRoleSelect('farmer')}
+                    className={`p-3 sm:p-4 rounded-2xl sm:rounded-3xl text-center transition-all flex flex-col items-center justify-between group cursor-pointer backdrop-blur-xl ${
+                      selectedRole === 'farmer'
+                        ? 'bg-white/45 border-2 border-emerald-400 shadow-xl shadow-emerald-600/20 ring-4 ring-emerald-400/25'
+                        : 'bg-white/25 border border-white/50 hover:bg-white/40 shadow-sm'
+                    }`}
                   >
-                    <Smartphone className="w-4 h-4 text-emerald-600" />
-                    <span>{heroLoginMode === 'password' ? 'Login with OTP' : 'Login with Password'}</span>
-                  </button>
-                </div>
-
-                {/* Create Account Link */}
-                <div className="text-center pt-5 mt-4 border-t border-slate-100">
-                  <p className="text-xs text-slate-600">
-                    New to AgriProcure?{' '}
-                    <Link
-                      to={`/register?role=${selectedRole}`}
-                      className="font-bold text-emerald-700 hover:text-emerald-900 hover:underline"
+                    <div
+                      className={`w-13 h-13 sm:w-14 sm:h-14 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105 shadow-md border-2 ${
+                        selectedRole === 'farmer'
+                          ? 'border-emerald-500 ring-2 ring-emerald-400/40'
+                          : 'border-emerald-300'
+                      }`}
                     >
-                      Create Account
-                    </Link>
-                  </p>
+                      <img src="/farmer-avatar.png" alt="Farmer Logo" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="mt-2.5 text-center">
+                      <span
+                        className={`font-black text-xs sm:text-sm block leading-tight ${
+                          selectedRole === 'farmer' ? 'text-emerald-950' : 'text-slate-900'
+                        }`}
+                      >
+                        {t('farmerRole')}
+                      </span>
+                      <span className="text-[10px] sm:text-[11px] text-slate-700 block mt-0.5 leading-tight font-medium">
+                        {t('farmerDesc')}
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Card 2: Government */}
+                  <button
+                    type="button"
+                    onClick={() => handleRoleSelect('company')}
+                    className={`p-3 sm:p-4 rounded-2xl sm:rounded-3xl text-center transition-all flex flex-col items-center justify-between group cursor-pointer backdrop-blur-xl ${
+                      selectedRole === 'company'
+                        ? 'bg-white/45 border-2 border-blue-400 shadow-xl shadow-blue-600/20 ring-4 ring-blue-400/25'
+                        : 'bg-white/25 border border-white/50 hover:bg-white/40 shadow-sm'
+                    }`}
+                  >
+                    <div
+                      className={`w-13 h-13 sm:w-14 sm:h-14 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105 shadow-md border-2 ${
+                        selectedRole === 'company'
+                          ? 'border-purple-500 ring-2 ring-purple-400/40'
+                          : 'border-purple-300'
+                      }`}
+                    >
+                      <img src="/govt-avatar.png" alt="Government Logo" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="mt-2.5 text-center">
+                      <span
+                        className={`font-black text-xs sm:text-sm block leading-tight ${
+                          selectedRole === 'company' ? 'text-blue-950' : 'text-slate-900'
+                        }`}
+                      >
+                        {t('governmentRole')}
+                      </span>
+                      <span className="text-[10px] sm:text-[11px] text-slate-700 block mt-0.5 leading-tight font-medium">
+                        {t('governmentDesc')}
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Card 3: Professional Agent */}
+                  <button
+                    type="button"
+                    onClick={() => handleRoleSelect('professional')}
+                    className={`p-3 sm:p-4 rounded-2xl sm:rounded-3xl text-center transition-all flex flex-col items-center justify-between group cursor-pointer backdrop-blur-xl ${
+                      selectedRole === 'professional'
+                        ? 'bg-white/45 border-2 border-purple-400 shadow-xl shadow-purple-600/20 ring-4 ring-purple-400/25'
+                        : 'bg-white/25 border border-white/50 hover:bg-white/40 shadow-sm'
+                    }`}
+                  >
+                    <div
+                      className={`w-13 h-13 sm:w-14 sm:h-14 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105 shadow-md border-2 ${
+                        selectedRole === 'professional'
+                          ? 'border-blue-500 ring-2 ring-blue-400/40'
+                          : 'border-blue-300'
+                      }`}
+                    >
+                      <img src="/agent-avatar.png" alt="Agent Logo" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="mt-2.5 text-center">
+                      <span
+                        className={`font-black text-xs sm:text-sm block leading-tight ${
+                          selectedRole === 'professional' ? 'text-purple-950' : 'text-slate-900'
+                        }`}
+                      >
+                        {t('agentRole')}
+                      </span>
+                      <span className="text-[10px] sm:text-[11px] text-slate-700 block mt-0.5 leading-tight font-medium">
+                        {t('agentDesc')}
+                      </span>
+                    </div>
+                  </button>
+
+                </div>
+
+                {/* Auto-fill Demo Credentials Capsule Bar */}
+                <div className="mt-5 p-2 sm:p-2.5 rounded-full bg-white/35 backdrop-blur-xl border border-white/60 text-xs flex flex-wrap items-center justify-between gap-2 shadow-xs">
+                  <span className="text-white font-bold text-[11px] sm:text-xs pl-2">
+                    {t('demoCredentials')}
+                  </span>
+                  <div className="flex gap-1.5 pr-1">
+                    <button
+                      type="button"
+                      onClick={() => quickFill('farmer')}
+                      className="px-3 py-1 rounded-full bg-emerald-100/95 text-emerald-800 font-extrabold hover:bg-emerald-200 text-xs shadow-xs border border-emerald-300 cursor-pointer transition-all hover:scale-105"
+                    >
+                      {t('farmerRole')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => quickFill('company')}
+                      className="px-3 py-1 rounded-full bg-blue-100/95 text-blue-800 font-extrabold hover:bg-blue-200 text-xs shadow-xs border border-blue-300 cursor-pointer transition-all hover:scale-105"
+                    >
+                      {t('governmentRole')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => quickFill('professional')}
+                      className="px-3 py-1 rounded-full bg-purple-100/95 text-purple-800 font-extrabold hover:bg-purple-200 text-xs shadow-xs border border-purple-300 cursor-pointer transition-all hover:scale-105"
+                    >
+                      {t('agentRole')}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Bottom Left Trust Cards */}
+            <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 bg-white/35 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/60 shadow-xs">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100/90 border border-emerald-300 flex items-center justify-center text-emerald-700">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-extrabold text-slate-900 block leading-tight">{t('secureLogin')}</span>
+                  <span className="text-[10px] text-slate-700 font-medium">{t('secureLoginDesc')}</span>
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-900 bg-emerald-100/90 backdrop-blur-md border border-emerald-300 px-3.5 py-1.5 rounded-full shadow-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                {t('safe100')}
+              </span>
+            </div>
+          </div>
+
+          {/* ===================================================================== */}
+          {/* VERTICAL GLASS DIVIDER (As shown in screenshot)                       */}
+          {/* ===================================================================== */}
+          <div className="hidden lg:block absolute left-1/2 top-4 bottom-4 w-px bg-white/40 shadow-[0_0_12px_rgba(255,255,255,0.6)] transform -translate-x-1/2" />
+
+          {/* ===================================================================== */}
+          {/* RIGHT COLUMN: Frosted Form (Exact Match to Screenshot)                */}
+          {/* ===================================================================== */}
+          <div className="lg:col-span-6 lg:pl-4">
+            <div className="space-y-4 max-w-md mx-auto lg:max-w-none">
+              
+              {/* Form Title: Green Font for high visibility */}
+              <h2 className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight">
+                {t('loginSubtitle')}
+              </h2>
+
+              {/* Account Loaded Banner */}
+              <div className="p-3 rounded-2xl bg-emerald-50/70 backdrop-blur-md border border-emerald-200/80 text-xs flex items-center justify-between text-emerald-900 shadow-xs">
+                <div className="flex items-center gap-2 font-bold">
+                  <Sprout className="w-4 h-4 text-emerald-600" />
+                  <span>{activeColorClasses.badgeText}</span>
+                </div>
+                <span className="text-[11px] bg-emerald-100 text-emerald-900 font-black px-2.5 py-0.5 rounded-lg border border-emerald-300">
+                  {t('ready')}
+                </span>
+              </div>
+
+              {/* Form Body: Password Mode */}
+              {heroLoginMode === 'password' ? (
+                <form onSubmit={handleHeroPasswordLogin} className="space-y-4">
+                  {/* Mobile / Identifier Input */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {selectedRole === 'farmer'
+                        ? t('mobileNumber')
+                        : selectedRole === 'company'
+                        ? t('companyEmail')
+                        : t('professionalId')}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                        {selectedRole === 'farmer' ? (
+                          <Phone className="w-4 h-4 text-slate-500" />
+                        ) : selectedRole === 'company' ? (
+                          <Mail className="w-4 h-4 text-slate-500" />
+                        ) : (
+                          <User className="w-4 h-4 text-slate-500" />
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        autoComplete="username"
+                        placeholder="9876543210"
+                        value={heroIdentifier}
+                        onChange={(e) => setHeroIdentifier(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-white/40 backdrop-blur-xl border border-white/70 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-500 focus:outline-none focus:bg-white/70 focus:border-emerald-500 transition-all shadow-inner"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password Input */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('password')}</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                        <Lock className="w-4 h-4 text-slate-500" />
+                      </div>
+                      <input
+                        type={showHeroPassword ? 'text' : 'password'}
+                        required
+                        autoComplete="current-password"
+                        placeholder="••••••••••"
+                        value={heroPassword}
+                        onChange={(e) => setHeroPassword(e.target.value)}
+                        className="w-full pl-10 pr-11 py-3 bg-white/40 backdrop-blur-xl border border-white/70 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-500 focus:outline-none focus:bg-white/70 focus:border-emerald-500 transition-all shadow-inner"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowHeroPassword(!showHeroPassword)}
+                        className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-800 cursor-pointer"
+                      >
+                        {showHeroPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    {/* Forgot Password Link */}
+                    <div className="text-right mt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setForgotModalOpen(true)}
+                        className="text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:underline cursor-pointer"
+                      >
+                        {t('forgotPassword')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Primary Login with Password Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-3.5 px-5 rounded-2xl transition-all shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/45 flex items-center justify-center gap-2 cursor-pointer text-sm mt-2 active:scale-[0.99]"
+                  >
+                    <span>{t('loginWithPassword')}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              ) : (
+                /* OTP Login Mode */
+                <form onSubmit={handleHeroVerifyOtp} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {t('mobileNumber')}
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-700 font-bold text-xs">
+                        +91
+                      </div>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        required
+                        autoComplete="tel"
+                        placeholder="9876543210"
+                        value={heroPhone}
+                        onChange={(e) => setHeroPhone(e.target.value)}
+                        className="w-full pl-12 pr-28 py-3 bg-white/40 backdrop-blur-xl border border-white/70 rounded-2xl text-sm font-semibold text-slate-900 focus:outline-none focus:bg-white/70 focus:border-emerald-500 transition-all shadow-inner"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleHeroRequestOtp}
+                        disabled={loading}
+                        className="absolute right-2 top-2 bottom-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-all shadow-xs cursor-pointer"
+                      >
+                        {heroOtpSent ? t('resendOtp') : t('sendOtp')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {heroOtpSent && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-900 mb-1.5">{t('enterOtp')}</label>
+                      <div className="relative">
+                        <Smartphone className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                        <input
+                          type="text"
+                          maxLength={6}
+                          required
+                          placeholder="123456"
+                          value={heroOtp}
+                          onChange={(e) => setHeroOtp(e.target.value)}
+                          className="w-full pl-10 pr-4 py-3 bg-white/40 backdrop-blur-xl border border-white/70 rounded-2xl text-base font-mono tracking-widest text-center font-bold text-slate-900 focus:outline-none focus:bg-white/70 focus:border-emerald-500 shadow-inner"
+                        />
+                      </div>
+                      {heroDemoOtp && (
+                        <p className="text-[11px] text-emerald-800 font-bold mt-1">Demo code auto-filled: {heroDemoOtp}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || !heroOtpSent}
+                    className="w-full bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-3.5 px-5 rounded-2xl transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer text-sm"
+                  >
+                    <span>{t('verifyOtp')}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
+
+              {/* OR Divider */}
+              <div className="relative my-3 text-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-400/50"></div>
+                </div>
+                <span className="relative bg-white/60 backdrop-blur-md px-3 py-0.5 rounded-full text-[11px] font-bold text-slate-600 uppercase tracking-widest border border-white/70 shadow-xs">
+                  {t('or')}
+                </span>
+              </div>
+
+              {/* Login with OTP Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setHeroLoginMode(heroLoginMode === 'password' ? 'otp' : 'password');
+                  setErrorBanner('');
+                }}
+                className="w-full border border-emerald-500/80 bg-white/35 hover:bg-white/60 backdrop-blur-xl text-emerald-950 font-bold py-3 px-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer shadow-xs"
+              >
+                <Smartphone className="w-4 h-4 text-emerald-700" />
+                <span>{heroLoginMode === 'password' ? t('loginWithOtp') : t('loginWithPassword')}</span>
+              </button>
+
+              {/* Footer Register Link */}
+              <div className="text-center pt-2">
+                <p className="text-xs font-semibold text-slate-800">
+                  {t('newToAgriSetu')}{' '}
+                  <Link
+                    to={`/register?role=${selectedRole}`}
+                    className="font-black text-emerald-700 hover:text-emerald-900 hover:underline"
+                  >
+                    {t('registerNow')}
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
-
-
+      </main>
 
       {/* ========================================================================= */}
-      {/* 4. VERIFIED & TRUSTED PLATFORM SECTION                                    */}
+      {/* 3. LIGHT BOTTOM FOOTER                                                    */}
       {/* ========================================================================= */}
-      <section className="bg-white border-y border-slate-200 py-10 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8">
-          {/* Left Description */}
-          <div className="max-w-md text-center lg:text-left">
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">Verified & Trusted Platform</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              All users are verified to ensure a safe and transparent marketplace for everyone.
-            </p>
+      <footer className="relative z-30 py-3 px-4 sm:px-8 text-xs text-slate-700">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex items-center gap-2 font-semibold">
+            <span>{t('verifiedMarketplace')}</span>
+            <span className="text-slate-400">•</span>
+            <span>{t('directApmc')}</span>
           </div>
-
-          {/* Right 3 Verification Badges */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full lg:w-auto">
-            {/* 1. Farmers Verified */}
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-              <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0 shadow-inner">
-                <FileCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-bold text-xs text-slate-900 block">Farmers Verified</span>
-                <span className="text-[10px] text-slate-500 block">Aadhaar & land details verification</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mt-1">
-                  <Check className="w-3 h-3" /> Verified
-                </span>
-              </div>
-            </div>
-
-            {/* 2. Companies Verified */}
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-              <div className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 shrink-0 shadow-inner">
-                <Building2 className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-bold text-xs text-slate-900 block">Companies Verified</span>
-                <span className="text-[10px] text-slate-500 block">GST & business verification</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full mt-1">
-                  <Check className="w-3 h-3" /> Verified
-                </span>
-              </div>
-            </div>
-
-            {/* 3. Professionals Verified */}
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-              <div className="w-11 h-11 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 shrink-0 shadow-inner">
-                <Award className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-bold text-xs text-slate-900 block">Professionals Verified</span>
-                <span className="text-[10px] text-slate-500 block">Qualification & org verification</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full mt-1">
-                  <Check className="w-3 h-3" /> Verified
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 5. FOOTER BAR & STATS                                                     */}
-      {/* ========================================================================= */}
-      <footer className="bg-slate-50 border-t border-slate-200 py-6 px-4 md:px-8 text-xs text-slate-600">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Stats Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
-                🌾
-              </div>
-              <div>
-                <span className="font-black text-slate-900 block text-sm leading-tight">10K+</span>
-                <span className="text-[10px] text-slate-500">Farmers</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
-                🏢
-              </div>
-              <div>
-                <span className="font-black text-slate-900 block text-sm leading-tight">500+</span>
-                <span className="text-[10px] text-slate-500">Companies</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-xs">
-                👥
-              </div>
-              <div>
-                <span className="font-black text-slate-900 block text-sm leading-tight">100+</span>
-                <span className="text-[10px] text-slate-500">Professionals</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xs">
-                📑
-              </div>
-              <div>
-                <span className="font-black text-slate-900 block text-sm leading-tight">50K+</span>
-                <span className="text-[10px] text-slate-500">Transactions</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Signature */}
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-            <span>Made with ❤️ for Farmers</span>
-            <Sprout className="w-4 h-4 text-emerald-600" />
+          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+            <span>{t('madeForIndia')}</span>
+            <Sprout className="w-3.5 h-3.5 text-emerald-600" />
           </div>
         </div>
       </footer>
+
+
+
+
 
       {/* ========================================================================= */}
       {/* 6. FORGOT PASSWORD MODAL (Page 8 of PDF)                                  */}
@@ -899,15 +853,15 @@ export default function Login() {
             {/* STAGE 1: ENTER REGISTERED MOBILE & SEND OTP */}
             {forgotStage === 'mobile' && (
               <div>
-                <h3 className="text-xl font-black text-slate-900">RESET PASSWORD</h3>
+                <h3 className="text-xl font-black text-slate-900">{t('resetPassword')}</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Enter your registered mobile number to receive a verification OTP.
+                  {t('forgotMobileDesc')}
                 </p>
 
                 <form onSubmit={handleForgotSendOtp} className="mt-5 space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Registered Mobile Number
+                      {t('registeredMobileNumber')}
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-bold text-xs">
@@ -930,7 +884,7 @@ export default function Login() {
                     disabled={forgotLoading}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-md flex items-center justify-center gap-2"
                   >
-                    <span>SEND OTP</span>
+                    <span>{t('sendOtp')}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </form>
@@ -940,14 +894,14 @@ export default function Login() {
             {/* STAGE 2: ENTER OTP */}
             {forgotStage === 'otp' && (
               <div>
-                <h3 className="text-xl font-black text-slate-900">OTP VERIFICATION</h3>
+                <h3 className="text-xl font-black text-slate-900">{t('otpVerification')}</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Enter the 6-digit OTP sent to <span className="font-bold">+91 {forgotPhone}</span>
+                  {t('enterOtpSentTo')} <span className="font-bold">+91 {forgotPhone}</span>
                 </p>
 
                 <form onSubmit={handleForgotVerifyOtp} className="mt-5 space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Enter OTP</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('enterOtp')}</label>
                     <input
                       type="text"
                       maxLength={6}
@@ -970,14 +924,14 @@ export default function Login() {
                       onClick={() => setForgotStage('mobile')}
                       className="w-1/3 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 rounded-xl text-xs"
                     >
-                      Back
+                      {t('back')}
                     </button>
                     <button
                       type="submit"
                       disabled={forgotLoading}
                       className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"
                     >
-                      VERIFY OTP
+                      {t('verifyOtp')}
                     </button>
                   </div>
                 </form>
@@ -987,14 +941,14 @@ export default function Login() {
             {/* STAGE 3: CREATE NEW PASSWORD */}
             {forgotStage === 'new_password' && (
               <div>
-                <h3 className="text-xl font-black text-slate-900">CREATE NEW PASSWORD</h3>
+                <h3 className="text-xl font-black text-slate-900">{t('createNewPassword')}</h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Choose a secure new password for your account.
                 </p>
 
                 <form onSubmit={handleForgotResetPassword} className="mt-5 space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">New Password</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('newPassword')}</label>
                     <div className="relative">
                       <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                       <input
@@ -1016,7 +970,7 @@ export default function Login() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Confirm Password</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{t('confirmPassword')}</label>
                     <div className="relative">
                       <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                       <input
@@ -1042,7 +996,7 @@ export default function Login() {
                     disabled={forgotLoading}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-md"
                   >
-                    RESET PASSWORD
+                    {t('resetPassword')}
                   </button>
                 </form>
               </div>
@@ -1055,7 +1009,7 @@ export default function Login() {
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">✓ Password Updated</h3>
+                  <h3 className="text-xl font-black text-slate-900">✓ {t('passwordUpdated')}</h3>
                   <p className="text-xs text-slate-500 mt-1">
                     Your password has been successfully reset. You can now login with your new credentials.
                   </p>
@@ -1066,7 +1020,7 @@ export default function Login() {
                   onClick={handleForgotFinishLogin}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition-colors shadow-md flex items-center justify-center gap-2"
                 >
-                  <span>LOGIN</span>
+                  <span>{t('proceedToLogin')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

@@ -263,7 +263,7 @@ exports.addProfessional = async (req, res) => {
   try {
     const { name, phone, email, password, licenseId, qualification, organization } = req.body;
     const bcrypt = require('bcryptjs');
-    const passwordHash = await bcrypt.hash(password || 'password123', 10);
+    const passwordHash = await bcrypt.hash(password || 'AgriSetu@2025', 10);
     const pro = await User.create({
       name,
       phone,

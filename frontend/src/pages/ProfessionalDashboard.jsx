@@ -2,14 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import { LanguageContext } from '../context/LanguageContext';
+import { farmerRulebookData } from '../data/farmerRulebookData';
 import {
-  Sprout,
-  Bell,
-  User,
-  LogOut,
   LayoutDashboard,
+  Calendar,
   Users,
-  Search,
+  QrCode,
   CheckCircle2,
   AlertTriangle,
   Scale,
@@ -23,1370 +22,1246 @@ import {
   ShieldCheck,
   Check,
   X,
-  Upload,
   RefreshCw,
   Phone,
   Settings,
   ArrowRight,
   Eye,
-  CheckCheck,
   Building,
   ChevronRight,
-  Sliders,
-  Send,
   AlertCircle,
   Printer,
   Download,
-  Volume2,
-  FileSpreadsheet,
   Layers,
+  Search,
   ExternalLink,
-  Database,
-  Image,
-  FileCheck,
-  History,
-  CheckSquare
+  MessageSquare,
+  LogOut,
+  Bell,
+  Cpu,
+  Globe,
+  UserCheck
 } from 'lucide-react';
 
-// ============================================================================
-// AUTHENTIC KAGGLE / INDIAN APMC PROCUREMENT QUALITY STANDARDS DATASET
-// Benchmarked against ICAR-CPRI, BIS IS:1484, and APMC Mandi Inspection Norms
-// ============================================================================
-const CROP_QUALITY_STANDARDS = {
-  Potato: {
-    dataset: 'Kaggle ICAR Late Blight & Indian APMC Grade Standards',
-    metrics: {
-      maxRotten: 3.0,
-      maxDamaged: 5.0,
-      maxForeign: 1.0,
-      minSizeQuality: 85,
-      optimalMoisture: '12–14%'
-    },
-    sampleDefaults: {
-      rottenItems: 1.8,
-      damagedItems: 3.2,
-      foreignMaterial: 0.6,
-      sizeQuality: 92,
-      qualityScore: 93,
-      confidence: 96.4,
-      recommendation: 'ACCEPT (Grade A - Premium APMC)',
-      grade: 'Grade A',
-      rate: 24.50
-    },
-    defectTypes: ['Late Blight Spotting', 'Hollow Heart', 'Surface Scab', 'Mechanical Bruising']
+// =========================================================================
+// COMPLETE MULTI-LANGUAGE TRANSLATION DICTIONARY FOR AGENT DASHBOARD
+// =========================================================================
+const agentDict = {
+  // Header Bar
+  portalTitle: {
+    en: 'FCI / GOV PROCUREMENT PORTAL',
+    bn: 'এফসিআই / সরকারি সংগ্রহ পোর্টাল',
+    hi: 'एफसीआई / सरकारी खरीद पोर्टल'
   },
-  Wheat: {
-    dataset: 'Kaggle GrainQuality / BIS Indian Standard IS:1484',
-    metrics: {
-      maxRotten: 1.5,
-      maxDamaged: 3.0,
-      maxForeign: 0.75,
-      minSizeQuality: 90,
-      optimalMoisture: '< 12.0%'
-    },
-    sampleDefaults: {
-      rottenItems: 0.8,
-      damagedItems: 2.1,
-      foreignMaterial: 0.4,
-      sizeQuality: 94,
-      qualityScore: 95,
-      confidence: 97.2,
-      recommendation: 'ACCEPT (Grade I - Milling Spec)',
-      grade: 'Grade I',
-      rate: 28.50
-    },
-    defectTypes: ['Shriveled Grains', 'Black Point', 'Weevil Bored', 'Foreign Seeds']
+  portalSub: {
+    en: 'Official Agent Terminal • ',
+    bn: 'অফিসিয়াল এজেন্ট টার্মিনাল • ',
+    hi: 'आधिकारिक एजेंट टर्मिनल • '
   },
-  Rice: {
-    dataset: 'Kaggle AgriVision Paddy & Milled Grain Standards',
-    metrics: {
-      maxRotten: 1.5,
-      maxDamaged: 2.5,
-      maxForeign: 0.5,
-      minSizeQuality: 88,
-      optimalMoisture: '< 14.0%'
-    },
-    sampleDefaults: {
-      rottenItems: 0.6,
-      damagedItems: 1.8,
-      foreignMaterial: 0.3,
-      sizeQuality: 91,
-      qualityScore: 94,
-      confidence: 95.8,
-      recommendation: 'ACCEPT (Grade A - Export / Basmati)',
-      grade: 'Grade A',
-      rate: 34.00
-    },
-    defectTypes: ['Chalky Belly', 'Discolored Kernels', 'Broken Grain', 'Paddy Husk']
+  agentIdBadge: {
+    en: 'Agent ID: ',
+    bn: 'এজেন্ট আইডি: ',
+    hi: 'एजेंट आईडी: '
   },
-  Tomato: {
-    dataset: 'Kaggle Tomato Ripeness & Defect Detection Dataset',
-    metrics: {
-      maxRotten: 2.0,
-      maxDamaged: 4.0,
-      maxForeign: 1.0,
-      minSizeQuality: 86,
-      optimalMoisture: 'Firm / 88% Ripe'
-    },
-    sampleDefaults: {
-      rottenItems: 1.2,
-      damagedItems: 2.8,
-      foreignMaterial: 0.5,
-      sizeQuality: 89,
-      qualityScore: 92,
-      confidence: 94.7,
-      recommendation: 'ACCEPT (Grade A - Fresh Table)',
-      grade: 'Grade A',
-      rate: 18.00
-    },
-    defectTypes: ['Early Blight', 'Catfacing', 'Sunscald', 'Stem Puncture']
+  logout: {
+    en: 'Logout',
+    bn: 'লগ আউট',
+    hi: 'लॉग आउट'
   },
-  Corn: {
-    dataset: 'Kaggle Maize Seed Defect Detection & APMC Grade I',
-    metrics: {
-      maxRotten: 2.0,
-      maxDamaged: 4.0,
-      maxForeign: 1.2,
-      minSizeQuality: 88,
-      optimalMoisture: '< 13.0%'
-    },
-    sampleDefaults: {
-      rottenItems: 1.1,
-      damagedItems: 2.9,
-      foreignMaterial: 0.7,
-      sizeQuality: 90,
-      qualityScore: 91,
-      confidence: 95.1,
-      recommendation: 'ACCEPT (Grade I - Commercial Feed/Flour)',
-      grade: 'Grade I',
-      rate: 22.00
-    },
-    defectTypes: ['Fusarium Ear Rot', 'Insect Damage', 'Cracked Kernels', 'Silk Contamination']
-  }
-};
 
-// ============================================================================
-// REGISTERED FARMERS DATABASE WITH DETAILED HISTORICAL TRANSACTION RECORDS
-// ============================================================================
-const REGISTERED_FARMERS = [
-  {
-    id: 'FARM-1029',
-    token: '#003',
-    name: 'Ramesh Kumar',
-    phone: '9876543210',
-    village: 'Rangia, Siliguri Rural',
-    district: 'Darjeeling, WB',
-    crop: 'Potato',
-    purchases: 14,
-    quantityKg: 6420,
-    value: 157290,
-    rating: 4.8,
-    bankAccount: 'SBI •••• 1234',
-    ifsc: 'SBIN0001245',
-    lastDelivery: 'Today (Token #003)',
-    qualityReports: [
-      { id: 'QR-9041', date: '09 Mar 2026', crop: 'Potato', rotten: '1.8%', damaged: '3.2%', foreign: '0.6%', score: 93, grade: 'Grade A', inspector: 'Rahul Sharma (PR-1024)' },
-      { id: 'QR-8722', date: '22 Feb 2026', crop: 'Potato', rotten: '2.1%', damaged: '4.0%', foreign: '0.8%', score: 90, grade: 'Grade A', inspector: 'Amit Roy (PR-1018)' },
-      { id: 'QR-8190', date: '05 Feb 2026', crop: 'Potato', rotten: '1.5%', damaged: '2.8%', foreign: '0.4%', score: 96, grade: 'Grade A+', inspector: 'Rahul Sharma (PR-1024)' },
-      { id: 'QR-7650', date: '18 Jan 2026', crop: 'Potato', rotten: '3.8%', damaged: '5.2%', foreign: '1.1%', score: 84, grade: 'Grade B', inspector: 'Suresh Das (PR-1009)' }
-    ],
-    weighbridgeHistory: [
-      { id: 'WB-10291', date: '09 Mar 2026', gross: 528.4, tare: 18.2, net: 510.2, rate: 24.50, amount: 12499.90, scale: 'WS-04' },
-      { id: 'WB-9844', date: '22 Feb 2026', gross: 495.0, tare: 17.5, net: 477.5, rate: 24.00, amount: 11460.00, scale: 'WS-02' },
-      { id: 'WB-9102', date: '05 Feb 2026', gross: 610.0, tare: 20.0, net: 590.0, rate: 25.00, amount: 14750.00, scale: 'WS-04' },
-      { id: 'WB-8521', date: '18 Jan 2026', gross: 540.0, tare: 18.0, net: 522.0, rate: 23.50, amount: 12267.00, scale: 'WS-01' }
-    ],
-    paymentsLedger: [
-      { utr: 'AGRI-UTR-992817462019', date: '09 Mar 2026', amount: 12499.90, mode: 'DBT-NEFT', bank: 'SBI', status: 'Credit Initiated' },
-      { utr: 'AGRI-UTR-882711094821', date: '22 Feb 2026', amount: 11460.00, mode: 'DBT-NEFT', bank: 'SBI', status: 'Settled' },
-      { utr: 'AGRI-UTR-771629001844', date: '05 Feb 2026', amount: 14750.00, mode: 'DBT-NEFT', bank: 'SBI', status: 'Settled' },
-      { utr: 'AGRI-UTR-661209384711', date: '18 Jan 2026', amount: 12267.00, mode: 'DBT-NEFT', bank: 'SBI', status: 'Settled' }
-    ],
-    photoEvidence: [
-      { id: 'EV-01', title: 'Front Sample Crate', date: '09 Mar 2026', url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=80', defect: 'Clear (0 defects detected)' },
-      { id: 'EV-02', title: 'Top Down Batch Surface', date: '09 Mar 2026', url: 'https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=600&auto=format&fit=crop&q=80', defect: 'Uniform grading (52-58mm)' },
-      { id: 'EV-03', title: 'Sample Cut Cross-section', date: '09 Mar 2026', url: 'https://images.unsplash.com/photo-1596464716127-f2a829822301?w=600&auto=format&fit=crop&q=80', defect: 'No internal necrosis or hollow heart' }
-    ]
+  // Sidebar Menu & Groups
+  agentDashboard: {
+    en: 'Agent Dashboard',
+    bn: 'এজেন্ট ড্যাশবোর্ড',
+    hi: 'एजेंट डैशबोर्ड'
   },
-  {
-    id: 'FARM-1044',
-    token: '#002',
-    name: 'Harish Verma',
-    phone: '9876543219',
-    village: 'Matigara Block',
-    district: 'Darjeeling, WB',
-    crop: 'Potato',
-    purchases: 8,
-    quantityKg: 3850,
-    value: 88550,
-    rating: 4.2,
-    bankAccount: 'PNB •••• 5678',
-    ifsc: 'PUNB0192800',
-    lastDelivery: 'Today (Token #002 - Rejected: Rotten 6.4%)',
-    qualityReports: [
-      { id: 'QR-9040', date: '09 Mar 2026', crop: 'Potato', rotten: '6.4%', damaged: '8.1%', foreign: '2.8%', score: 62, grade: 'Rejected', inspector: 'Rahul Sharma (PR-1024)' },
-      { id: 'QR-8610', date: '19 Feb 2026', crop: 'Potato', rotten: '2.5%', damaged: '4.2%', foreign: '0.9%', score: 88, grade: 'Grade A', inspector: 'Amit Roy (PR-1018)' }
-    ],
-    weighbridgeHistory: [
-      { id: 'WB-9820', date: '19 Feb 2026', gross: 450.0, tare: 18.0, net: 432.0, rate: 23.50, amount: 10152.00, scale: 'WS-02' },
-      { id: 'WB-8990', date: '02 Feb 2026', gross: 510.0, tare: 19.0, net: 491.0, rate: 24.00, amount: 11784.00, scale: 'WS-03' }
-    ],
-    paymentsLedger: [
-      { utr: 'AGRI-UTR-849102837461', date: '19 Feb 2026', amount: 10152.00, mode: 'DBT-NEFT', bank: 'PNB', status: 'Settled' },
-      { utr: 'AGRI-UTR-718293049182', date: '02 Feb 2026', amount: 11784.00, mode: 'DBT-NEFT', bank: 'PNB', status: 'Settled' }
-    ],
-    photoEvidence: [
-      { id: 'EV-04', title: 'High Moisture & Rot Evidence', date: '09 Mar 2026', url: 'https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=600&auto=format&fit=crop&q=80', defect: 'Rotten items 6.4% exceeds APMC tolerance' }
-    ]
+  catTodaysWork: {
+    en: "📋 TODAY'S WORK",
+    bn: '📋 আজকের কাজ',
+    hi: '📋 आज का कार्य'
   },
-  {
-    id: 'FARM-2018',
-    token: '#004',
-    name: 'Gurpreet Singh',
-    phone: '9876543222',
-    village: 'Gopali, Kharagpur Rural',
-    district: 'Paschim Medinipur, WB',
-    crop: 'Wheat',
-    purchases: 19,
-    quantityKg: 12300,
-    value: 344400,
-    rating: 4.9,
-    bankAccount: 'HDFC •••• 9921',
-    ifsc: 'HDFC0000492',
-    lastDelivery: 'Today (Token #004 - In Queue)',
-    qualityReports: [
-      { id: 'QR-8910', date: '28 Feb 2026', crop: 'Wheat', rotten: '0.6%', damaged: '1.9%', foreign: '0.3%', score: 96, grade: 'Grade I', inspector: 'Rahul Sharma (PR-1024)' },
-      { id: 'QR-8320', date: '14 Feb 2026', crop: 'Wheat', rotten: '0.9%', damaged: '2.2%', foreign: '0.5%', score: 94, grade: 'Grade I', inspector: 'Amit Roy (PR-1018)' }
-    ],
-    weighbridgeHistory: [
-      { id: 'WB-9501', date: '28 Feb 2026', gross: 880.0, tare: 24.0, net: 856.0, rate: 28.50, amount: 24396.00, scale: 'WS-04' },
-      { id: 'WB-8812', date: '14 Feb 2026', gross: 920.0, tare: 25.0, net: 895.0, rate: 28.00, amount: 25060.00, scale: 'WS-04' }
-    ],
-    paymentsLedger: [
-      { utr: 'AGRI-UTR-918273645019', date: '28 Feb 2026', amount: 24396.00, mode: 'DBT-NEFT', bank: 'HDFC', status: 'Settled' },
-      { utr: 'AGRI-UTR-827364519283', date: '14 Feb 2026', amount: 25060.00, mode: 'DBT-NEFT', bank: 'HDFC', status: 'Settled' }
-    ],
-    photoEvidence: [
-      { id: 'EV-05', title: 'Golden Kernel Sample', date: '28 Feb 2026', url: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=80', defect: 'Purity 99.4%, Moisture 11.2%' }
-    ]
+  todaysSchedule: {
+    en: "Today's Schedule",
+    bn: 'আজকের সময়সূচী',
+    hi: 'आज की समय सारणी'
   },
-  {
-    id: 'FARM-3091',
-    token: '#005',
-    name: 'Sunil Mondal',
-    phone: '9876543233',
-    village: 'Chanchal-I',
-    district: 'Malda, WB',
-    crop: 'Rice',
-    purchases: 11,
-    quantityKg: 7150,
-    value: 214500,
-    rating: 4.6,
-    bankAccount: 'Bank of Baroda •••• 4410',
-    ifsc: 'BARB0MALDAX',
-    lastDelivery: 'Today (Token #005 - In Queue)',
-    qualityReports: [
-      { id: 'QR-8755', date: '25 Feb 2026', crop: 'Rice', rotten: '0.8%', damaged: '2.0%', foreign: '0.4%', score: 93, grade: 'Grade A', inspector: 'Suresh Das (PR-1009)' }
-    ],
-    weighbridgeHistory: [
-      { id: 'WB-9410', date: '25 Feb 2026', gross: 730.0, tare: 22.0, net: 708.0, rate: 30.00, amount: 21240.00, scale: 'WS-02' }
-    ],
-    paymentsLedger: [
-      { utr: 'AGRI-UTR-738291049281', date: '25 Feb 2026', amount: 21240.00, mode: 'DBT-NEFT', bank: 'BOB', status: 'Settled' }
-    ],
-    photoEvidence: [
-      { id: 'EV-06', title: 'Paddy Moisture and Husk Scan', date: '25 Feb 2026', url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80', defect: 'Clear long grain rice sample' }
-    ]
+  pendingTasks: {
+    en: 'Pending Tasks',
+    bn: 'অপেক্ষারত কাজসমূহ',
+    hi: 'लंबित कार्य'
   },
-  {
-    id: 'FARM-4015',
-    token: '#006',
-    name: 'Debjyoti Sinha',
-    phone: '9876543244',
-    village: 'Maynaguri Block',
-    district: 'Jalpaiguri, WB',
-    crop: 'Tomato',
-    purchases: 6,
-    quantityKg: 2400,
-    value: 72000,
-    rating: 4.5,
-    bankAccount: 'Canara Bank •••• 7731',
-    ifsc: 'CNRB0001092',
-    lastDelivery: '03 Mar 2026',
-    qualityReports: [
-      { id: 'QR-8620', date: '03 Mar 2026', crop: 'Tomato', rotten: '1.4%', damaged: '3.1%', foreign: '0.5%', score: 91, grade: 'Grade A', inspector: 'Rahul Sharma (PR-1024)' }
-    ],
-    weighbridgeHistory: [
-      { id: 'WB-9211', date: '03 Mar 2026', gross: 420.0, tare: 15.0, net: 405.0, rate: 18.00, amount: 7290.00, scale: 'WS-01' }
-    ],
-    paymentsLedger: [
-      { utr: 'AGRI-UTR-629103847291', date: '03 Mar 2026', amount: 7290.00, mode: 'DBT-NEFT', bank: 'Canara Bank', status: 'Settled' }
-    ],
-    photoEvidence: [
-      { id: 'EV-07', title: 'Ripeness & Color Calibration', date: '03 Mar 2026', url: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80', defect: 'Firmness 94%, 0 sunscald' }
-    ]
+  catWorkflow: {
+    en: '🌾 PROCUREMENT WORKFLOW',
+    bn: '🌾 সংগ্রহ প্রক্রিয়া (ওয়ার্কফ্লো)',
+    hi: '🌾 खरीद प्रक्रिया (वर्कफ़्लो)'
   },
-  {
-    id: 'FARM-5120',
-    token: '#007',
-    name: 'Manpreet Kaur',
-    phone: '9876543255',
-    village: 'Galsi-II',
-    district: 'Purba Bardhaman, WB',
-    crop: 'Corn',
-    purchases: 9,
-    quantityKg: 5600,
-    value: 134400,
-    rating: 4.7,
-    bankAccount: 'Axis Bank •••• 8812',
-    ifsc: 'UTIB0000122',
-    lastDelivery: '27 Feb 2026',
-    qualityReports: [
-      { id: 'QR-8540', date: '27 Feb 2026', crop: 'Corn', rotten: '1.2%', damaged: '2.8%', foreign: '0.7%', score: 92, grade: 'Grade I', inspector: 'Rahul Sharma (PR-1024)' }
-    ],
-    weighbridgeHistory: [
-      { id: 'WB-9010', date: '27 Feb 2026', gross: 630.0, tare: 20.0, net: 610.0, rate: 22.00, amount: 13420.00, scale: 'WS-03' }
-    ],
-    paymentsLedger: [
-      { utr: 'AGRI-UTR-519283746192', date: '27 Feb 2026', amount: 13420.00, mode: 'DBT-NEFT', bank: 'Axis Bank', status: 'Settled' }
-    ],
-    photoEvidence: [
-      { id: 'EV-08', title: 'Cob & Moisture Analysis', date: '27 Feb 2026', url: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=600&auto=format&fit=crop&q=80', defect: 'Moisture 12.6%, 0 aflatoxin' }
-    ]
-  }
-];
+  step1Verify: {
+    en: '1. Verify Farmer (QR)',
+    bn: '১. কৃষক যাচাইকরণ (QR)',
+    hi: '1. किसान सत्यापन (QR)'
+  },
+  step2Crop: {
+    en: '2. Crop Verification',
+    bn: '২. ফসল যাচাইকরণ',
+    hi: '2. फसल सत्यापन'
+  },
+  step3Quality: {
+    en: '3. Quality Testing',
+    bn: '৩. গুণমান পরীক্ষা',
+    hi: '3. गुणवत्ता परीक्षण'
+  },
+  step4Weighment: {
+    en: '4. Digital Weighment',
+    bn: '৪. ডিজিটাল ওজন নির্ধারণ',
+    hi: '4. डिजिटल तौल'
+  },
+  step5Decision: {
+    en: '5. Procurement Decision',
+    bn: '৫. সংগ্রহ সিদ্ধান্ত',
+    hi: '5. खरीद निर्णय'
+  },
+  catTransactions: {
+    en: '💳 TRANSACTIONS',
+    bn: '💳 লেনদেনসমূহ',
+    hi: '💳 लेनदेन'
+  },
+  todaysTxns: {
+    en: "Today's Transactions",
+    bn: 'আজকের লেনদেনসমূহ',
+    hi: 'आज के लेनदेन'
+  },
+  digitalReceipts: {
+    en: 'Digital Receipts',
+    bn: 'ডিজিটাল রসিদ',
+    hi: 'डिजिटल रसीदें'
+  },
+  catRules: {
+    en: '📜 RULES & EXCEPTIONS',
+    bn: '📜 নিয়ম ও ব্যতিক্রম',
+    hi: '📜 नियम एवं अपवाद'
+  },
+  officialRulebook: {
+    en: 'Official Rulebook',
+    bn: 'সরকারি রুলবুক',
+    hi: 'आधिकारिक नियम पुस्तिका'
+  },
+  exceptionsDisputes: {
+    en: 'Exceptions & Disputes',
+    bn: 'ব্যতিক্রম ও বিরোধ',
+    hi: 'अपवाद एवं विवाद'
+  },
+
+  // Home Dashboard View
+  goodMorning: {
+    en: 'GOOD MORNING, AGENT ',
+    bn: 'শুভ সকাল, এজেন্ট ',
+    hi: 'शुभ प्रभात, एजेंट '
+  },
+  callNextFarmerBtn: {
+    en: '📢 CALL NEXT FARMER',
+    bn: '📢 পরবর্তী কৃষককে ডাকুন',
+    hi: '📢 अगले किसान को बुलाएं'
+  },
+  kpiTodaysFarmers: {
+    en: "TODAY'S FARMERS",
+    bn: 'আজকের মোট কৃষক',
+    hi: 'आज के किसान'
+  },
+  subTotalBooked: {
+    en: 'Total Booked',
+    bn: 'মোট বুকিংকৃত',
+    hi: 'कुल बुक किए गए'
+  },
+  kpiCheckedIn: {
+    en: 'CHECKED IN',
+    bn: 'উপস্থিত হয়েছেন',
+    hi: 'चेक इन'
+  },
+  subAtYard: {
+    en: 'At Centre Yard',
+    bn: 'সংগ্রহ কেন্দ্রে উপস্থিত',
+    hi: 'खरीद केंद्र पर'
+  },
+  kpiCompleted: {
+    en: 'COMPLETED',
+    bn: 'সম্পন্ন হয়েছে',
+    hi: 'पूर्ण'
+  },
+  subProcuredReceipted: {
+    en: 'Procured & Receipted',
+    bn: 'সংগৃহীত ও রসিদপ্রদত্ত',
+    hi: 'खरीदा गया व रसीद दी गई'
+  },
+  kpiPending: {
+    en: 'PENDING',
+    bn: 'অপেক্ষারত',
+    hi: 'लंबित'
+  },
+  subRemainingQueue: {
+    en: 'Remaining Queue',
+    bn: 'অবশিষ্ট কাতার',
+    hi: 'शेष कतार'
+  },
+  liveQueueTitle: {
+    en: '🚜 LIVE QUEUE MONITOR',
+    bn: '🚜 সরাসরি কাতার পর্যবেক্ষণ',
+    hi: '🚜 लाइव कतार मॉनिटर'
+  },
+  counterActive: {
+    en: 'Counter 04 Active',
+    bn: 'কাউন্টার ০৪ সক্রিয়',
+    hi: 'काउंटर 04 सक्रिय'
+  },
+  nowServingLabel: {
+    en: 'Now Serving:',
+    bn: 'বর্তমান গ্রাহক:',
+    hi: 'वर्तमान ग्राहक:'
+  },
+  nextLabel: {
+    en: 'Next:',
+    bn: 'পরবর্তী:',
+    hi: 'अगला:'
+  },
+  yourNextLabel: {
+    en: 'Your Next:',
+    bn: 'আপনার পরবর্তী:',
+    hi: 'आपका अगला:'
+  },
+  btnOpenFullQueue: {
+    en: '[ Open Full Queue ]',
+    bn: '[ সম্পূর্ণ কাতার দেখুন ]',
+    hi: '[ पूरी कतार खोलें ]'
+  },
+  capacityTitle: {
+    en: '⚖️ CENTRE CAPACITY UTILISATION',
+    bn: '⚖️ কেন্দ্রের মোট ক্ষমতার ব্যবহার',
+    hi: '⚖️ केंद्र क्षमता का उपयोग'
+  },
+  dailyMax500: {
+    en: 'Daily Max 500 Qtl',
+    bn: 'দৈনিক সর্বোচ্চ ৫০০ কুইন্টাল',
+    hi: 'दैनिक अधिकतम 500 क्विंटल'
+  },
+  procuredTodayLabel: {
+    en: 'Procured Today:',
+    bn: 'আজকে সংগৃহীত:',
+    hi: 'आज की खरीद:'
+  },
+  utilisationRateLabel: {
+    en: 'Utilisation Rate:',
+    bn: 'ব্যবহারের হার:',
+    hi: 'उपयोग दर:'
+  },
+  remainingLabel: {
+    en: 'Remaining:',
+    bn: 'অবশিষ্ট:',
+    hi: 'शेष:'
+  },
+  nextFarmerTitle: {
+    en: '👉 NEXT FARMER IN QUEUE',
+    bn: '👉 কাতারে পরবর্তী কৃষক',
+    hi: '👉 कतार में अगला किसान'
+  },
+  checkedInReady: {
+    en: 'Checked In & Ready',
+    bn: 'উপস্থিত ও প্রস্তুত',
+    hi: 'चेक इन व तैयार'
+  },
+  lblTokenNo: { en: 'Token Number:', bn: 'টোকেন নম্বর:', hi: 'टोकन नंबर:' },
+  lblFarmerId: { en: 'Farmer ID:', bn: 'কৃষক আইডি:', hi: 'किसान आईडी:' },
+  lblFarmerName: { en: 'Farmer Name:', bn: 'কৃষকের নাম:', hi: 'किसान का नाम:' },
+  lblDeclaredCrop: { en: 'Declared Crop:', bn: 'ঘোষিত ফসল:', hi: 'घोषित फसल:' },
+  lblQuantity: { en: 'Quantity:', bn: 'পরিমাণ:', hi: 'मात्रा:' },
+  lblSlotWindow: { en: 'Slot Window:', bn: 'স্লটের সময়সীমা:', hi: 'स्लॉट समय सीमा:' },
+  btnStartJourney: {
+    en: '[ START PROCUREMENT JOURNEY ]',
+    bn: '[ ফসল সংগ্রহ প্রক্রিয়া শুরু করুন ]',
+    hi: '[ खरीद प्रक्रिया शुरू करें ]'
+  },
+
+  // Schedule Table
+  scheduleTitle: {
+    en: "📋 TODAY'S PROCUREMENT SCHEDULE",
+    bn: '📋 আজকের ফসল সংগ্রহের সময়সূচী',
+    hi: '📋 आज की खरीद समय सारणी'
+  },
+  searchSchedulePlaceholder: {
+    en: 'Search Token / Farmer ID / Name...',
+    bn: 'টোকেন / কৃষক আইডি / নাম খুঁজুন...',
+    hi: 'टोकन / किसान आईडी / नाम खोजें...'
+  },
+  thToken: { en: 'Token', bn: 'টোকেন', hi: 'टोकन' },
+  thFarmerDetails: { en: 'Farmer Details', bn: 'কৃষকের বিবরণ', hi: 'किसान विवरण' },
+  thCrop: { en: 'Crop', bn: 'ফসল', hi: 'फसल' },
+  thDeclaredQty: { en: 'Declared Qty', bn: 'ঘোষিত পরিমাণ', hi: 'घोषित मात्रा' },
+  thSlotTime: { en: 'Slot Time', bn: 'স্লটের সময়', hi: 'स्लॉट समय' },
+  thStatus: { en: 'Status', bn: 'অবস্থা', hi: 'स्थिति' },
+  thAction: { en: 'Action', bn: 'পদক্ষেপ', hi: 'कार्रवाई' },
+  btnStartProcurement: { en: 'Start Procurement', bn: 'সংগ্রহ শুরু করুন', hi: 'खरीद शुरू करें' },
+
+  // Workflow Steps
+  verifyStepTitle: {
+    en: 'STEP 1: FARMER IDENTITY & BOOKING VERIFICATION (QR SCAN)',
+    bn: 'ধাপ ১: কৃষকের পরিচয় ও বুকিং যাচাইকরণ (QR স্ক্যান)',
+    hi: 'चरण 1: किसान पहचान एवं बुकिंग सत्यापन (QR स्कैन)'
+  },
+  scanBoxTitle: { en: 'SCAN FARMER TOKEN / QR CODE', bn: 'কৃষকের টোকেন / QR কোড স্ক্যান করুন', hi: 'किसान टोकन / QR कोड स्कैन करें' },
+  scanCameraActive: { en: 'Scan Camera Active', bn: 'ক্যামেরা সক্রিয়', hi: 'स्कैन कैमरा सक्रिय' },
+  btnSimulateScan: { en: 'Simulate QR Scan (Token #4)', bn: 'QR স্ক্যান সিমুলেট করুন (টোকেন #৪)', hi: 'QR स्कैन सिमुलेट करें (टोकन #4)' },
+  verifiedDetailsTitle: { en: 'VERIFIED FARMER & BOOKING DETAILS', bn: 'যাচাইকৃত কৃষক ও বুকিং বিবরণ', hi: 'सत्यापित किसान व बुकिंग विवरण' },
+  lblParchaRef: { en: 'Land Parcha Ref:', bn: 'জমির খতিয়ান পর্চা নং:', hi: 'भूमि पर्चा संदर्भ:' },
+  lblMaxQuota: { en: 'Max Quota Allowed:', bn: 'সর্বোচ্চ অনুমোদিত কোটা:', hi: 'अधिकतम अनुमत कोटा:' },
+  btnNextStep2: { en: 'Proceed to Step 2: Crop Verification →', bn: 'ধাপ ২-এ এগিয়ে যান: ফসল যাচাইকরণ →', hi: 'चरण 2 पर आगे बढ़ें: फसल सत्यापन →' },
+
+  cropVerifyTitle: {
+    en: 'STEP 2: CROP IDENTITY & PACKAGING PHYSICAL INSPECTION',
+    bn: 'ধাপ ২: ফসল ও প্যাকেজিং ভৌত পরিদর্শন',
+    hi: 'चरण 2: फसल पहचान एवं पैकेजिंग भौतिक निरीक्षण'
+  },
+  checkCropMatch: {
+    en: 'Declared Crop Matches Physical Grain (Paddy / Wheat)',
+    bn: 'ঘোষিত ফসল ও বাস্তব শস্যের মিল রয়েছে (ধান / গম)',
+    hi: 'घोषित फसल और वास्तविक अनाज का मिलान (धान / गेहूं)'
+  },
+  checkPackaging: {
+    en: 'Gunny Bag Packaging Acceptable (Standard 50kg Bags)',
+    bn: 'চটের বস্তার প্যাকেজিং গ্রহণযোগ্য (মানক ৫০ কেজি বস্তা)',
+    hi: 'बोरी पैकेजिंग स्वीकार्य (मानक 50 किग्रा बोरियां)'
+  },
+  checkSampling: {
+    en: 'Grain Sample Presented for Moisture & Impurity Testing',
+    bn: 'আর্দ্রতা ও অপদ্রব্য পরীক্ষার জন্য নমুনা জমা প্রদানকৃত',
+    hi: 'नमी और अशुद्धता परीक्षण के लिए नमूना प्रस्तुत किया गया'
+  },
+  btnNextStep3: { en: 'Proceed to Step 3: Quality Testing →', bn: 'ধাপ ৩-এ এগিয়ে যান: গুণমান পরীক্ষা →', hi: 'चरण 3 पर आगे बढ़ें: गुणवत्ता परीक्षण →' },
+
+  qualityStepTitle: {
+    en: 'STEP 3: GRAIN QUALITY ASSESSMENT & MOISTURE TESTING',
+    bn: 'ধাপ ৩: শস্যের গুণমান মূল্যায়ন ও আর্দ্রতা পরীক্ষা',
+    hi: 'चरण 3: अनाज गुणवत्ता मूल्यांकन एवं नमी परीक्षण'
+  },
+  moistureMeterTitle: { en: 'CONNECTED MOISTURE METER #MM-1024', bn: 'সংযুক্ত আর্দ্রতা মিটার #MM-1024', hi: 'कनेक्टेड नमी मीटर #MM-1024' },
+  liveReadingLabel: { en: 'Live Reading: 13.5%', bn: 'সরাসরি পাঠ: ১৩.৫%', hi: 'लाइव रीडिंग: 13.5%' },
+  lblMoistureActual: { en: 'Moisture Content (%):', bn: 'আর্দ্রতার পরিমাণ (%):', hi: 'नमी की मात्रा (%):' },
+  lblForeignActual: { en: 'Foreign Matter (%):', bn: 'অপদ্রব্য / খড়কুটো (%):', hi: 'बाह्य पदार्थ (%):' },
+  lblDamagedActual: { en: 'Damaged Grains (%):', bn: 'ক্ষতিগ্রস্ত দানা (%):', hi: 'क्षतिग्रस्त दाने (%):' },
+  lblDiscolouredActual: { en: 'Discoloured Grains (%):', bn: 'বিবর্ণ দানা (%):', hi: 'रंगहीन दाने (%):' },
+  evalResultTitle: { en: 'EVALUATED QUALITY GRADE & DEDUCTION', bn: 'মূল্যায়নকৃত মান ও মূল্য হ্রাস', hi: 'मूल्यांकित गुणवत्ता ग्रेड व कटौती' },
+  lblAssessedGrade: { en: 'Assessed Quality Grade:', bn: 'মূল্যায়নকৃত গ্রেড:', hi: 'मूल्यांकित गुणवत्ता ग्रेड:' },
+  lblQualityDiscount: { en: 'Quality Penalty / Discount:', bn: 'গুণমান জরিমানা / ছাড়:', hi: 'गुणवत्ता जुर्माना / छूट:' },
+  lblResultStatus: { en: 'Quality Result Status:', bn: 'গুণমান ফলাফলের অবস্থা:', hi: 'गुणवत्ता परिणाम स्थिति:' },
+  btnNextStep4: { en: 'Proceed to Step 4: Digital Weighment →', bn: 'ধাপ ৪-এ এগিয়ে যান: ডিজিটাল ওজন নির্ধারণ →', hi: 'चरण 4 पर आगे बढ़ें: डिजिटल तौल →' },
+
+  weighmentStepTitle: {
+    en: 'STEP 4: DIGITAL WEIGHBRIDGE & TARE BALANCE CALCULATION',
+    bn: 'ধাপ ৪: ডিজিটাল ওয়েব্রিজ ও খালি বস্তার ওজন হিসাব',
+    hi: 'चरण 4: डिजिटल वेब्रिज एवं खाली बोरी वजन गणना'
+  },
+  scaleOnlineBadge: { en: 'WEIGHBRIDGE SCALE #WS-00452 ONLINE', bn: 'ওয়েব্রিজ স্কেল #WS-00452 সক্রিয়', hi: 'वेब्रिज स्केल #WS-00452 ऑनलाइन' },
+  lblGrossWeight: { en: 'GROSS WEIGHT (QTL)', bn: 'মোট ওজন (কুইন্টাল)', hi: 'कुल वजन (क्विंटल)' },
+  lblTareWeight: { en: 'TARE WEIGHT (QTL)', bn: 'বস্তার ওজন (কুইন্টাল)', hi: 'खाली बोरी वजन (क्विंटल)' },
+  lblNetGrainWeight: { en: 'NET GRAIN WEIGHT (QTL)', bn: 'নিট শস্যের ওজন (কুইন্টাল)', hi: 'शुद्ध अनाज का वजन (क्विंटल)' },
+  btnNextStep5: { en: 'Proceed to Step 5: Procurement Decision →', bn: 'ধাপ ৫-এ এগিয়ে যান: সংগ্রহ সিদ্ধান্ত →', hi: 'चरण 5 पर आगे बढ़ें: खरीद निर्णय →' },
+
+  decisionStepTitle: {
+    en: 'STEP 5: FINAL PROCUREMENT DECISION & DIGITAL RECEIPT GENERATION',
+    bn: 'ধাপ ৫: চূড়ান্ত সংগ্রহ সিদ্ধান্ত ও ডিজিটাল রসিদ প্রদান',
+    hi: 'चरण 5: अंतिम खरीद निर्णय एवं डिजिटल रसीद निर्माण'
+  },
+  purchaseSummaryTitle: { en: 'OFFICIAL PURCHASE VALUATION SUMMARY', bn: 'সরকারি ক্রয় মূল্যয়ন সারসংক্ষেপ', hi: 'आधिकारिक खरीद मूल्यांकन सारांश' },
+  lblNetWeightVal: { en: 'Net Grain Weight:', bn: 'নিট শস্যের ওজন:', hi: 'शुद्ध अनाज का वजन:' },
+  lblMspRateVal: { en: 'Official MSP Rate:', bn: 'সরকারি এমএসপি দর:', hi: 'आधिकारिक एमएसपी दर:' },
+  lblGrossValuation: { en: 'Gross Value:', bn: 'মোট মূল্য:', hi: 'कुल मूल्य:' },
+  lblQualityPenalty: { en: 'Quality Penalty Deduction:', bn: 'গুণমান জরিমানা কাটছাঁট:', hi: 'गुणवत्ता जुर्माना कटौती:' },
+  lblFinalPayable: { en: 'TOTAL NET PAYABLE:', bn: 'মোট নিট প্রদেয় অর্থ:', hi: 'कुल शुद्ध देय राशि:' },
+  btnConfirmPrint: {
+    en: '[ CONFIRM & PRINT OFFICIAL RECEIPT ]',
+    bn: '[ নিশ্চিত করুন ও সরকারি রসিদ প্রিন্ট করুন ]',
+    hi: '[ पुष्टि करें और आधिकारिक रसीद प्रिंट करें ]'
+  },
+  btnRejectProduce: {
+    en: '[ REJECT PRODUCE ]',
+    bn: '[ ফসল প্রত্যাখ্যান করুন ]',
+    hi: '[ फसल अस्वीकार करें ]'
+  },
+
+  // Transactions & Receipts
+  txnsTitle: {
+    en: "💳 TODAY'S COMPLETED PROCUREMENT TRANSACTIONS",
+    bn: '💳 আজকের সম্পন্নকৃত ফসল সংগ্রহের লেনদেনসমূহ',
+    hi: '💳 आज के पूर्ण खरीद लेनदेन'
+  },
+  thReceiptNo: { en: 'Receipt No.', bn: 'রসিদ নং', hi: 'रसीद सं.' },
+  thNetWeight: { en: 'Net Weight', bn: 'নিট ওজন', hi: 'शुद्ध वजन' },
+  thTotalPayable: { en: 'Total Payable', bn: 'মোট প্রদেয় অর্থ', hi: 'कुल देय' },
+  btnViewReceipt: { en: 'View Receipt', bn: 'রসিদ দেখুন', hi: 'रसीद देखें' },
+
+  // Rulebook & Exceptions
+  rulebookTitle: {
+    en: '📜 OFFICIAL FCI PROCUREMENT RULEBOOK & FAQ NORMS',
+    bn: '📜 সরকারি এফসিআই সংগ্রহ রুলবুক ও মানদণ্ড',
+    hi: '📜 आधिकारिक एफसीआई खरीद नियम पुस्तिका व मानक'
+  },
+  exceptionsTitle: {
+    en: '🚨 EXCEPTIONS, DISPUTES & APPEAL LOG',
+    bn: '🚨 ব্যতিক্রম, বিরোধ ও আপিল রেকর্ড',
+    hi: '🚨 अपवाद, विवाद एवं अपील लॉग'
+  },
+  thExceptionId: { en: 'Exception ID', bn: 'ব্যতিক্রম আইডি', hi: 'अपवाद आईडी' },
+  thDisputeType: { en: 'Dispute Type', bn: 'বিরোধের ধরন', hi: 'विवाद का प्रकार' },
+  thParameter: { en: 'Parameter', bn: 'প্যারামিটার', hi: 'मापदंड' },
+  btnInspectDispute: { en: 'Inspect Dispute', bn: 'বিরোধ পরীক্ষা করুন', hi: 'विवाद का निरीक्षण करें' },
+
+  // Printable Receipt Modal
+  receiptHeaderTitle: { en: 'OFFICIAL GOVERNMENT PROCUREMENT RECEIPT', bn: 'সরকারি ফসল সংগ্রহ রসিদ', hi: 'आधिकारिक सरकारी खरीद रसीद' },
+  btnPrintReceipt: { en: 'Print Receipt', bn: 'রসিদ প্রিন্ট করুন', hi: 'रसीद प्रिंट करें' },
+  btnDownloadPdf: { en: 'Download PDF', bn: 'পিডিএফ ডাউনলোড', hi: 'पीडीएफ डाउनलोड' },
+  btnCloseReceipt: { en: 'Close Receipt', bn: 'রসিদ বন্ধ করুন', hi: 'रसीद बंद करें' }
+};
 
 export default function ProfessionalDashboard() {
   const { user, logout } = useContext(AuthContext);
+  const { language, setLanguage } = useContext(LanguageContext);
   const navigate = useNavigate();
 
-  // Active Sidebar Menu
-  // 'dashboard' | 'queue' | 'verification' | 'ai' | 'weighing' | 'purchases' | 'payments' | 'farmers' | 'feedback' | 'complaints' | 'notifications' | 'profile' | 'settings'
+  // Translation helper function
+  const at = (key) => {
+    if (agentDict[key]) {
+      return agentDict[key][language] || agentDict[key].en || key;
+    }
+    return key;
+  };
+
+  // Status Badge Translation Helper
+  const trStatus = (status) => {
+    const map = {
+      Done: { en: 'Done', bn: 'সম্পন্ন', hi: 'पूर्ण' },
+      Serving: { en: 'Serving', bn: 'প্রদানরত', hi: 'सेवा में' },
+      Waiting: { en: 'Waiting', bn: 'অপেক্ষারত', hi: 'प्रतीक्षा में' },
+      Active: { en: 'Active', bn: 'সক্রিয়', hi: 'सक्रिय' },
+      ACCEPTED: { en: 'ACCEPTED', bn: 'গৃহীত', hi: 'स्वीकृत' },
+      ACCEPTED_WITH_DISCOUNT: { en: 'ACCEPTED WITH DISCOUNT', bn: 'মূল্য হ্রাস সহ গৃহীত', hi: 'छूट के साथ स्वीकृत' },
+      REJECTED: { en: 'REJECTED', bn: 'প্রত্যাখ্যাত', hi: 'अस्वीकृत' },
+      'Under Appeal': { en: 'Under Appeal', bn: 'আপিলাধীন', hi: 'अपील के तहत' },
+      'Pending Supervisor Approval': { en: 'Pending Supervisor Approval', bn: 'সুপারভাইজার অনুমোদনের অপেক্ষায়', hi: 'पर्यवेक्षक स्वीकृति लंबित' },
+      Open: { en: 'Open', bn: 'অমীমাংসিত', hi: 'खुला' }
+    };
+    return map[status]?.[language] || map[status]?.en || status;
+  };
+
+  // Crop Translation Helper
+  const trCrop = (c) => {
+    if (!c) return c;
+    if (language === 'bn') {
+      return c.replace(/Paddy \(Common\)/g, 'ধান (সাধারণ)')
+              .replace(/Paddy \(Grade A\)/g, 'ধান (গ্রেড এ)')
+              .replace(/Paddy & Wheat/g, 'ধান ও গম')
+              .replace(/Paddy/g, 'ধান')
+              .replace(/Wheat \(FAQ Standard\)/g, 'গম (এফএকিউ মানদণ্ড)')
+              .replace(/Wheat/g, 'গম');
+    }
+    if (language === 'hi') {
+      return c.replace(/Paddy \(Common\)/g, 'धान (सामान्य)')
+              .replace(/Paddy \(Grade A\)/g, 'धान (ग्रेड ए)')
+              .replace(/Paddy & Wheat/g, 'धान और गेहूं')
+              .replace(/Paddy/g, 'धान')
+              .replace(/Wheat \(FAQ Standard\)/g, 'गेहूं (एफएक्यू मानक)')
+              .replace(/Wheat/g, 'गेहूं');
+    }
+    return c;
+  };
+
+  // Agent Active Sidebar Navigation Menu Item
   const [activeMenu, setActiveMenu] = useState('dashboard');
 
-  // Online / Offline Status Toggle (PDF 1 Page 2)
-  const [isOnline, setIsOnline] = useState(true);
-
-  // Notification Modal / Dropdown State (PDF 1 Page 1 & 13)
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'New farmer arrived', time: '2 min ago', type: 'success', text: 'Farmer #105 arrived at APMC Yard' },
-    { id: 2, title: 'AI analysis completed', time: '5 min ago', type: 'info', text: 'Token #003 Potato analysis scored 93/100 (Grade A)' },
-    { id: 3, title: 'Payment problem', time: '18 min ago', type: 'error', text: 'Transaction retry required for Token #089' },
-    { id: 4, title: 'Admin message', time: '1 hr ago', type: 'warning', text: 'Admin updated Wheat procurement rate to ₹28.50/kg' },
-    { id: 5, title: 'Queue alert', time: 'Just now', type: 'warning', text: 'Queue waiting time exceeded 25 mins at Bay 02' }
-  ]);
-
-  // Dashboard Overview Statistics (PDF 1 Page 2-3)
-  const [stats, setStats] = useState({
-    arrived: 128,
-    purchased: 96,
-    rejected: 18,
-    waiting: 14
-  });
-
-  // Centre Status (PDF 1 Page 13-14)
-  const centreStatus = {
-    waiting: 14,
-    processing: 4,
-    completed: 96,
-    capacity: 72,
-    avgWaitMin: 18,
-    isCongested: true,
-    nearbySuggested: { name: 'Siliguri PC-02 (Jalpaiguri Rd)', distance: '12 km', waiting: 10 }
-  };
-
-  // Live Queue List (PDF 1 Page 3)
-  const [queueItems, setQueueItems] = useState([
-    { id: '1', token: '#001', farmer: 'Ramesh Patel', product: 'Potato', qty: '520 kg', status: 'Purchased', time: '09:15', phone: '9876543210' },
-    { id: '2', token: '#002', farmer: 'Harish Verma', product: 'Potato', qty: '430 kg', status: 'Rejected', time: '09:30', phone: '9876543219' },
-    { id: '3', token: '#003', farmer: 'Ramesh Kumar', product: 'Potato', qty: '500 kg', status: 'Processing', time: '09:40', phone: '9876543210' },
-    { id: '4', token: '#004', farmer: 'Gurpreet Singh', product: 'Wheat', qty: '850 kg', status: 'Waiting', time: '09:50', phone: '9876543222' },
-    { id: '5', token: '#005', farmer: 'Sunil Mondal', product: 'Rice', qty: '700 kg', status: 'Waiting', time: '10:05', phone: '9876543233' },
-    { id: '6', token: '#006', farmer: 'Debjyoti Sinha', product: 'Tomato', qty: '400 kg', status: 'Waiting', time: '10:20', phone: '9876543244' }
-  ]);
-
-  // Current Active Procurement Subject (When "CALL NEXT FARMER" or row clicked)
-  const [currentFarmer, setCurrentFarmer] = useState({
-    bookingId: '6a954968b6c2516fab2b39de',
-    token: '#003',
-    farmerName: 'Ramesh Kumar',
-    farmerId: 'FARM-1029',
-    phone: '9876543210',
-    product: 'Potato',
-    expectedQty: 500,
-    slot: '09:30–10:00 AM',
-    centre: 'APMC Central Procurement Yard (Siliguri)',
-    counter: 'Counter 04'
-  });
-
-  // Call Banner message
-  const [callAlert, setCallAlert] = useState('Current Token: #003 | Ramesh Kumar | Counter 04 notified: "Please proceed to Counter 04."');
-
-  // Step 1: Farmer Verification State (PDF 1 Page 5)
-  const [verification, setVerification] = useState({
-    farmerIdentity: true,
-    slotVerified: true,
-    productVerified: true,
-    isVerified: true
-  });
-
-  // Step 2: Product Verification State (PDF 1 Page 5-6)
-  const [productInspection, setProductInspection] = useState({
-    actualQuantity: 510.2,
-    condition: 'Good',
-    visibleDamage: 3.2,
-    rottenItems: 1.8,
-    foreignMaterial: 0.6,
-    remarks: 'Clean harvest, uniform grading, moisture optimal.',
-    isSaved: true
-  });
-
-  // Step 3: Weighing Module State (PDF 1 Page 6)
-  const [weighing, setWeighing] = useState({
-    grossWeight: 528.40,
-    tareWeight: 18.20,
-    netWeight: 510.20,
-    device: 'WS-04',
-    time: '09:37 AM',
-    isConfirmed: true
-  });
-
-  // Step 4: Photos State (PDF 1 Page 6-7)
-  const [photos, setPhotos] = useState({
-    front: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&auto=format&fit=crop&q=60',
-    top: 'https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=500&auto=format&fit=crop&q=60',
-    sample: 'https://images.unsplash.com/photo-1596464716127-f2a829822301?w=500&auto=format&fit=crop&q=60',
-    damage: null
-  });
-
-  // Step 5: AI Quality Analysis State (PDF 1 Page 7)
-  const [aiReport, setAiReport] = useState({
-    rottenItems: 1.8,
-    damagedItems: 3.2,
-    foreignMaterial: 0.6,
-    sizeQuality: 92,
-    qualityScore: 93,
-    confidence: 96.4,
-    recommendation: 'ACCEPT (Grade A - Premium APMC)',
-    grade: 'Grade A',
-    analyzed: true,
-    loading: false
-  });
-
-  // AI Vision Progress Bar and Inference Stages State
-  const [aiProgress, setAiProgress] = useState(0);
-  const [aiInferenceStage, setAiInferenceStage] = useState('');
-  const [aiAnalyzing, setAiAnalyzing] = useState(false);
-
-  // Digital Receipt Modal State
-  const [showDigitalReceipt, setShowDigitalReceipt] = useState(false);
-
-  // Farmer Historical Records Modals ('quality' | 'weighbridge' | 'payments' | 'photo' | null)
-  const [activeHistoryModal, setActiveHistoryModal] = useState(null);
-
-  // Floating Toast Notification
-  const [toastMessage, setToastMessage] = useState(null);
-
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((cur) => (cur === msg ? null : cur));
-    }, 4500);
-  };
-
-  // Step 6: Final Decision - Accept / Reject State (PDF 1 Page 8-10)
-  const [decision, setDecision] = useState({
-    status: 'Purchased', // 'Pending' | 'Purchased' | 'Rejected'
-    ratePerKg: 24.50,
-    totalAmount: 12499.90,
-    purchaseId: 'PUR-10291',
-    rejectReason: 'Poor Quality',
-    rejectRemarks: '',
-    rejectionDone: false,
-    purchaseDone: true
-  });
-
-  // Step 7: Feedback State (PDF 1 Page 11-12)
-  const [feedback, setFeedback] = useState({
-    productQuality: 4,
-    cooperation: 5,
-    timeliness: 4,
-    overall: 5,
-    comment: 'Great farmer cooperation and compliant delivery timing.',
-    submitted: false
-  });
-
-  // Complaint Module Form State (PDF 1 Page 12-13)
-  const [complaintForm, setComplaintForm] = useState({
-    token: '#003',
-    issue: 'Wrong weight',
-    description: '',
-    evidenceFile: null,
-    evidenceName: '',
-    evidenceSize: '',
-    submitted: false
-  });
-  const [evidenceError, setEvidenceError] = useState(null);
-  const [complaintSuccess, setComplaintSuccess] = useState(null);
-
-  // Farmer Search State (PDF 1 Page 11) - Default to Ramesh Kumar
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFarmerProfile, setSelectedFarmerProfile] = useState(REGISTERED_FARMERS[0]);
-
-  // Profile Edit State (PDF 1 Page 14)
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileData, setProfileData] = useState({
+  // Agent Profile info
+  const agentInfo = {
+    id: user?.professionalProfile?.licenseId || 'A1024',
     name: user?.name || 'Rahul Sharma',
-    id: user?.professionalProfile?.licenseId || 'PR-1024',
-    company: 'AgriCorp Buying Ltd.',
-    centre: 'Siliguri PC-01',
-    rating: 4.6
+    centre: 'ABC Procurement Centre (Siliguri)',
+    date: '17 Sept 2026'
+  };
+
+  // Agent Daily Schedule Summary Cards State
+  const [scheduleStats, setScheduleStats] = useState({
+    todaysFarmers: 84,
+    checkedIn: 52,
+    completed: 4,
+    pending: 21,
+    nowServing: 4,
+    next: 5,
+    yourNext: 6,
+    capacityUsed: 100,
+    capacityTotal: 500
   });
 
-  // Load real bookings from backend on mount
-  useEffect(() => {
-    API.get('/bookings/all')
-      .then((res) => {
-        if (res.data && res.data.length > 0) {
-          const formatted = res.data.map((b) => ({
-            id: b._id,
-            token: `#${String(b.tokenNumber).padStart(3, '0')}`,
-            farmer: b.farmerId?.name || 'Farmer',
-            product: b.cropProfile?.cropType || b.announcementId?.cropType || 'Potato',
-            qty: `${b.weighedQuantity || b.cropProfile?.expectedQuantity || 500} kg`,
-            status: b.status || 'Waiting',
-            time: new Date(b.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            phone: b.farmerId?.phone || '9876543210'
-          }));
-          setQueueItems(formatted);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  // Next Farmer Action Card State
+  const [nextFarmerCard, setNextFarmerCard] = useState({
+    tokenNumber: 43,
+    farmerId: 'FMR-WB-09214',
+    farmerName: 'Ramesh Patel',
+    crop: 'Paddy',
+    quantityQtl: 25,
+    bookingId: 'BK202609170045',
+    slot: '10:00–11:00 AM'
+  });
+
+  // Today's Procurement Schedule Table List (Tokens #1 to #10)
+  const [scheduleList, setScheduleList] = useState([
+    { token: '#1', farmer: 'FMR-WB-08102 (Suresh Kumar)', crop: 'Paddy', qty: 20, time: '10:00 AM', status: 'Done', bookingId: 'BK202609170001' },
+    { token: '#2', farmer: 'FMR-WB-08920 (Anil Roy)', crop: 'Paddy', qty: 25, time: '10:10 AM', status: 'Done', bookingId: 'BK202609170002' },
+    { token: '#3', farmer: 'FMR-WB-09551 (Gurpreet Singh)', crop: 'Wheat', qty: 30, time: '10:20 AM', status: 'Done', bookingId: 'BK202609170003' },
+    { token: '#4', farmer: 'FMR-WB-09214 (Ramesh Patel)', crop: 'Paddy', qty: 25, time: '10:30 AM', status: 'Serving', bookingId: 'BK202609170004' },
+    { token: '#5', farmer: 'FMR-WB-09812 (Sunil Mondal)', crop: 'Wheat', qty: 30, time: '10:40 AM', status: 'Waiting', bookingId: 'BK202609170005' },
+    { token: '#6', farmer: 'FMR-WB-10029 (Harish Verma)', crop: 'Paddy', qty: 40, time: '10:50 AM', status: 'Waiting', bookingId: 'BK202609170006' },
+    { token: '#7', farmer: 'FMR-WB-10245 (Debjyoti Sinha)', crop: 'Paddy', qty: 35, time: '11:00 AM', status: 'Waiting', bookingId: 'BK202609170007' },
+    { token: '#8', farmer: 'FMR-WB-10490 (Bikash Das)', crop: 'Paddy', qty: 22, time: '11:10 AM', status: 'Waiting', bookingId: 'BK202609170008' },
+    { token: '#9', farmer: 'FMR-WB-10612 (Pradip Biswas)', crop: 'Wheat', qty: 28, time: '11:20 AM', status: 'Waiting', bookingId: 'BK202609170009' },
+    { token: '#10', farmer: 'FMR-WB-10899 (Subhash Barman)', crop: 'Paddy', qty: 32, time: '11:30 AM', status: 'Waiting', bookingId: 'BK202609170010' }
+  ]);
+
+  // Today's Completed Procurement Transactions List (4-5 transactions connected across tabs)
+  const [transactionsList, setTransactionsList] = useState([
+    {
+      receiptId: 'RCPT-2026-009421',
+      txnId: 'PR-2026-008721',
+      farmerName: 'Ramesh Patel',
+      farmerId: 'FMR-WB-09214',
+      bookingId: 'BK202609170004',
+      centre: 'PC-BNK-001 (Siliguri)',
+      crop: 'Paddy (Grade A)',
+      season: 'Kharif 2026',
+      grossWeightQtl: 26.20,
+      tareWeightQtl: 1.20,
+      netWeightQtl: 25.00,
+      mspRate: 2389,
+      grossValue: 59725,
+      deduction: 0,
+      finalPayable: 59725,
+      status: 'Done',
+      receiptStatus: 'GENERATED',
+      paymentStatus: 'PROCESSING',
+      date: '18-09-2026',
+      time: '10:30 AM'
+    },
+    {
+      receiptId: 'RCPT-2026-009420',
+      txnId: 'PR-2026-008720',
+      farmerName: 'Gurpreet Singh',
+      farmerId: 'FMR-WB-09551',
+      bookingId: 'BK202609170003',
+      centre: 'PC-BNK-001 (Siliguri)',
+      crop: 'Wheat (FAQ Standard)',
+      season: 'RMS 2025-26',
+      grossWeightQtl: 31.50,
+      tareWeightQtl: 1.50,
+      netWeightQtl: 30.00,
+      mspRate: 2425,
+      grossValue: 72750,
+      deduction: 0,
+      finalPayable: 72750,
+      status: 'Done',
+      receiptStatus: 'VERIFIED',
+      paymentStatus: 'CREDITED',
+      date: '18-09-2026',
+      time: '10:20 AM'
+    },
+    {
+      receiptId: 'RCPT-2026-009419',
+      txnId: 'PR-2026-008719',
+      farmerName: 'Anil Roy',
+      farmerId: 'FMR-WB-08920',
+      bookingId: 'BK202609170002',
+      centre: 'PC-BNK-001 (Siliguri)',
+      crop: 'Paddy (Common)',
+      season: 'Kharif 2026',
+      grossWeightQtl: 26.10,
+      tareWeightQtl: 1.10,
+      netWeightQtl: 25.00,
+      mspRate: 2369,
+      grossValue: 59225,
+      deduction: 0,
+      finalPayable: 59225,
+      status: 'Done',
+      receiptStatus: 'VERIFIED',
+      paymentStatus: 'CREDITED',
+      date: '18-09-2026',
+      time: '10:10 AM'
+    },
+    {
+      receiptId: 'RCPT-2026-009418',
+      txnId: 'PR-2026-008718',
+      farmerName: 'Suresh Kumar',
+      farmerId: 'FMR-WB-08102',
+      bookingId: 'BK202609170001',
+      centre: 'PC-BNK-001 (Siliguri)',
+      crop: 'Paddy (Common)',
+      season: 'Kharif 2026',
+      grossWeightQtl: 21.00,
+      tareWeightQtl: 1.00,
+      netWeightQtl: 20.00,
+      mspRate: 2369,
+      grossValue: 47380,
+      deduction: 0,
+      finalPayable: 47380,
+      status: 'Done',
+      receiptStatus: 'VERIFIED',
+      paymentStatus: 'CREDITED',
+      date: '18-09-2026',
+      time: '10:00 AM'
+    }
+  ]);
+
+  const [selectedTxnForReceipt, setSelectedTxnForReceipt] = useState(null);
+
+  // Filters for Schedule Table
+  const [scheduleFilterCrop, setScheduleFilterCrop] = useState('All');
+  const [scheduleSearchQuery, setScheduleSearchQuery] = useState('');
+
+  // Active Procurement Workflow Session State
+  const [activeSession, setActiveSession] = useState({
+    bookingId: 'BK202609170004',
+    tokenNumber: '#4',
+    farmerId: 'FMR-WB-09214',
+    farmerName: 'Ramesh Patel',
+    declaredCrop: 'Paddy',
+    declaredQtyQtl: 25,
+    actualCrop: 'Paddy',
+    cropMatched: true,
+    packagingAcceptable: true,
+    presentedForSampling: true,
+
+    // Sample
+    sampleId: 'SMP-2026-000452',
+    sampleTime: '10:27 AM',
+    sampleWeightKg: 2.5,
+    samplingMethod: 'Standard Multi-Point Probe',
+
+    // Quality Assessment Values
+    moistureActual: 13.5,
+    foreignMatterActual: 1.2,
+    damagedGrainActual: 0.8,
+    discolouredGrainActual: 0.3,
+    shrivelledGrainActual: 0.5,
+    weevilledGrainActual: 0.1,
+    qualityResult: 'ACCEPTED',
+    qualityAdjustmentPerQtl: 0,
+    qualityRejectReason: '',
+
+    // IoT Connected Devices State
+    moistureMeterConnected: true,
+    moistureDeviceId: 'MM-1024',
+    moistureLastCalibrated: '15/09/2026',
+    scaleConnected: true,
+    scaleDeviceId: 'WS-00452',
+
+    // Weighment
+    grossWeightQtl: 26.20,
+    tareWeightQtl: 1.20,
+    netWeightQtl: 25.00,
+    weighmentConfirmed: true,
+
+    // Valuation
+    mspRatePerQtl: 2369,
+    grossMspValue: 59225,
+    qualityAdjustmentTotal: 0,
+    finalPayable: 59225,
+
+    // Status Steps
+    checkInDone: true,
+    cropVerifyDone: true,
+    sampleDone: true,
+    qualityDone: true,
+    weighmentDone: true,
+    procurementConfirmed: true,
+    receiptGenerated: true,
+    paymentInitiated: true,
+    receiptId: 'RCPT-2026-009421'
+  });
+
+  // Exceptions / Disputes State
+  const [exceptionsList, setExceptionsList] = useState([
+    { id: 'EX-101', type: 'Quality Rejection', farmer: 'FMR-WB-1044 (Rajesh Ghosh)', bookingId: 'BK202609170088', parameter: 'Moisture', measured: '18.4%', limit: '17.0%', status: 'Under Appeal' },
+    { id: 'EX-102', type: 'Weight Variance', farmer: 'FMR-WB-0991 (Amit Das)', bookingId: 'BK202609170092', declared: '25.5 Qtl', scale: '24.8 Qtl', diff: '0.7 Qtl', status: 'Pending Supervisor Approval' },
+    { id: 'EX-103', type: 'Crop Quality Variance', farmer: 'FMR-WB-1082 (Tapan Roy)', bookingId: 'BK202609170099', parameter: 'Foreign Matter', measured: '3.2%', limit: '2.0%', status: 'Open' }
+  ]);
+
+  const [selectedException, setSelectedException] = useState(null);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+
+  // Toast Notification
+  const [toastMsg, setToastMsg] = useState(null);
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 4000);
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  // ============================================================================
-  // WORKABLE CALL NEXT FARMER HANDLER
-  // Real Queue Advancement, Browser Audio Announcement & Workflow Transition
-  // ============================================================================
-  const handleCallNextFarmer = async (targetToken = null) => {
-    // 1. Locate next eligible waiting/arrived farmer or specific target token
-    let nextItem = null;
-    if (targetToken) {
-      nextItem = queueItems.find((item) => item.token === targetToken);
+  const handleCallNextFarmer = (specificTokenStr = null) => {
+    let nextIndex = -1;
+    if (specificTokenStr) {
+      nextIndex = scheduleList.findIndex((x) => x.token === specificTokenStr);
     } else {
-      nextItem = queueItems.find((item) => item.status === 'Waiting' || item.status === 'Arrived');
+      nextIndex = scheduleList.findIndex((x) => x.status === 'Waiting');
     }
 
-    // Fallback: pick any item not currently being processed
-    if (!nextItem) {
-      nextItem = queueItems.find((item) => item.token !== currentFarmer.token) || queueItems[0];
+    if (nextIndex === -1) {
+      showToast('All farmers in queue for today have been called and processed!');
+      return;
     }
 
-    const nextToken = nextItem.token;
-    const nextFarmerName = nextItem.farmer;
-    const nextProduct = nextItem.product || 'Potato';
-    const nextQty = parseInt(nextItem.qty) || 500;
-    const standards = CROP_QUALITY_STANDARDS[nextProduct] || CROP_QUALITY_STANDARDS['Potato'];
+    const nextFarmerObj = scheduleList[nextIndex];
+    const tokenNum = parseInt(nextFarmerObj.token.replace(/\D/g, '')) || 43;
 
-    // 2. Update Live Queue List: Mark target as 'Processing', previous as 'Purchased'
-    setQueueItems((prev) =>
-      prev.map((item) => {
-        if (item.token === nextToken) return { ...item, status: 'Processing' };
-        if (item.token === currentFarmer.token && item.status === 'Processing') return { ...item, status: 'Purchased' };
-        return item;
-      })
-    );
+    const updatedList = scheduleList.map((item, idx) => {
+      if (idx < nextIndex) return { ...item, status: 'Done' };
+      if (idx === nextIndex) return { ...item, status: 'Serving' };
+      return item;
+    });
 
-    // 3. Update dashboard counters
-    setStats((prev) => ({
+    setScheduleList(updatedList);
+
+    const completedCount = nextIndex;
+    const pendingCount = scheduleList.length - (nextIndex + 1);
+    const nextTokenNum = tokenNum + 1;
+    const yourNextTokenNum = tokenNum + 2;
+
+    setScheduleStats((prev) => ({
       ...prev,
-      waiting: Math.max(0, prev.waiting - 1),
-      purchased: prev.purchased + 1
+      nowServing: tokenNum,
+      next: nextTokenNum,
+      yourNext: yourNextTokenNum,
+      completed: completedCount,
+      pending: pendingCount
     }));
 
-    // 4. Match with registered farmers database if available
-    const matchedReg = REGISTERED_FARMERS.find(
-      (f) => f.name.toLowerCase() === nextFarmerName.toLowerCase() || f.token === nextToken
-    );
-    const farmerId = matchedReg ? matchedReg.id : `FARM-${Math.floor(1000 + Math.random() * 9000)}`;
+    const upcomingObj = scheduleList[nextIndex + 1] || nextFarmerObj;
+    const cleanFarmerName = upcomingObj.farmer.replace(/FMR-WB-\d+\s\((.*)\)/, '$1');
+    const cleanFarmerId = upcomingObj.farmer.split(' ')[0];
 
-    // 5. Update Current Farmer Subject
-    setCurrentFarmer({
-      bookingId: nextItem.id || `book-${Date.now()}`,
-      token: nextToken,
-      farmerName: nextFarmerName,
-      farmerId: farmerId,
-      phone: nextItem.phone || '9876543210',
-      product: nextProduct,
-      expectedQty: nextQty,
-      slot: nextItem.time ? `${nextItem.time} Slot` : '09:30–10:00 AM',
-      centre: 'APMC Central Procurement Yard (Siliguri)',
-      counter: 'Counter 04'
+    setNextFarmerCard({
+      tokenNumber: parseInt(upcomingObj.token.replace(/\D/g, '')) || nextTokenNum,
+      farmerId: cleanFarmerId,
+      farmerName: cleanFarmerName,
+      crop: upcomingObj.crop,
+      quantityQtl: upcomingObj.qty,
+      bookingId: upcomingObj.bookingId,
+      slot: `${upcomingObj.time}`
     });
 
-    // 6. Reset step workflows for fresh incoming farmer inspection
-    setVerification({
-      farmerIdentity: true,
-      slotVerified: true,
-      productVerified: false,
-      isVerified: false
-    });
+    const currentCleanName = nextFarmerObj.farmer.replace(/FMR-WB-\d+\s\((.*)\)/, '$1');
+    const currentCleanId = nextFarmerObj.farmer.split(' ')[0];
 
-    setProductInspection({
-      actualQuantity: nextQty,
-      condition: 'Good',
-      visibleDamage: standards.sampleDefaults.damagedItems,
-      rottenItems: standards.sampleDefaults.rottenItems,
-      foreignMaterial: standards.sampleDefaults.foreignMaterial,
-      remarks: `APMC quality standard initialized for ${nextProduct}.`,
-      isSaved: false
-    });
+    setActiveSession((prev) => ({
+      ...prev,
+      tokenNumber: nextFarmerObj.token,
+      bookingId: nextFarmerObj.bookingId,
+      farmerId: currentCleanId,
+      farmerName: currentCleanName,
+      declaredCrop: nextFarmerObj.crop,
+      declaredQtyQtl: nextFarmerObj.qty,
+      actualCrop: nextFarmerObj.crop,
+      grossWeightQtl: Number((nextFarmerObj.qty + 1.2).toFixed(2)),
+      netWeightQtl: nextFarmerObj.qty,
+      grossMspValue: nextFarmerObj.qty * (nextFarmerObj.crop === 'Wheat' ? 2425 : 2369),
+      finalPayable: nextFarmerObj.qty * (nextFarmerObj.crop === 'Wheat' ? 2425 : 2369),
+      checkInDone: true
+    }));
 
-    const tare = 18.0;
-    const gross = nextQty + tare;
-    setWeighing({
-      grossWeight: gross,
-      tareWeight: tare,
-      netWeight: nextQty,
-      device: 'WS-04',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isConfirmed: false
-    });
-
-    setAiReport({
-      rottenItems: standards.sampleDefaults.rottenItems,
-      damagedItems: standards.sampleDefaults.damagedItems,
-      foreignMaterial: standards.sampleDefaults.foreignMaterial,
-      sizeQuality: standards.sampleDefaults.sizeQuality,
-      qualityScore: standards.sampleDefaults.qualityScore,
-      confidence: standards.sampleDefaults.confidence,
-      recommendation: standards.sampleDefaults.recommendation,
-      grade: standards.sampleDefaults.grade,
-      analyzed: false,
-      loading: false
-    });
-
-    const newPurchaseId = `PUR-${Math.floor(10000 + Math.random() * 90000)}`;
-    setDecision({
-      status: 'Pending',
-      ratePerKg: standards.sampleDefaults.rate,
-      totalAmount: Math.round(nextQty * standards.sampleDefaults.rate * 100) / 100,
-      purchaseId: newPurchaseId,
-      rejectReason: 'Poor Quality',
-      rejectRemarks: '',
-      rejectionDone: false,
-      purchaseDone: false
-    });
-
-    // 7. Update Top Call Alert Banner
-    const alertMsg = `📢 Now Calling: Token ${nextToken} (${nextFarmerName}) | Proceed to Counter 04 immediately. SMS alert dispatched.`;
-    setCallAlert(alertMsg);
-
-    // 8. Real Voice Announcement using browser SpeechSynthesis API
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
-        const tokenDigits = nextToken.replace(/[^0-9]/g, '');
         const speech = new SpeechSynthesisUtterance(
-          `Token number ${tokenDigits || nextToken}, ${nextFarmerName}, please proceed to Counter 04.`
+          `Token number ${tokenNum}, ${currentCleanName}, please proceed to Counter 04.`
         );
-        speech.rate = 0.92;
-        speech.pitch = 1.0;
+        speech.rate = 0.95;
         speech.lang = 'en-IN';
         window.speechSynthesis.speak(speech);
-      } catch (e) {
-        console.warn('Speech synthesis unavailable:', e);
-      }
+      } catch (err) {}
     }
 
-    showToast(`📢 Called Token ${nextToken} (${nextFarmerName}) to Counter 04`);
-    setActiveMenu('verification');
-
-    // Notify backend
-    try {
-      await API.post('/bookings/call-next', { counter: 'Counter 04', bookingId: nextItem.id });
-    } catch (err) {}
+    showToast(`📢 Called Token ${nextFarmerObj.token} (${currentCleanName}) to Counter 04!`);
   };
 
-  // Farmer Verification Handler (PDF 1 Section 8)
-  const handleSaveFarmerVerification = async () => {
-    try {
-      await API.post('/bookings/verify-farmer', {
-        bookingId: currentFarmer.bookingId,
-        farmerIdentity: verification.farmerIdentity,
-        slotVerified: verification.slotVerified,
-        productVerified: verification.productVerified
-      });
-    } catch (e) {}
-    setVerification({ ...verification, isVerified: true });
-    showToast('Farmer Identity, Scheduled Slot & Product verified successfully.');
-    setActiveMenu('weighing');
-  };
-
-  // Product Inspection Handler (PDF 1 Section 9)
-  const handleSaveProductInspection = async () => {
-    try {
-      await API.post('/bookings/verify-product', {
-        bookingId: currentFarmer.bookingId,
-        ...productInspection
-      });
-    } catch (e) {}
-    setProductInspection({ ...productInspection, isSaved: true });
-    showToast('Product Quality Inspection recorded successfully.');
-    setActiveMenu('ai');
-  };
-
-  // Digital Weighing Handler (PDF 1 Section 10)
-  const handleConfirmWeight = async () => {
-    try {
-      await API.post('/bookings/record-weight', {
-        bookingId: currentFarmer.bookingId,
-        grossWeight: weighing.grossWeight,
-        tareWeight: weighing.tareWeight,
-        netWeight: weighing.netWeight,
-        deviceId: weighing.device
-      });
-    } catch (e) {}
-    setWeighing({ ...weighing, isConfirmed: true });
-    showToast(`Weight confirmed: Gross ${weighing.grossWeight} kg -> Net ${weighing.netWeight} kg.`);
-    setActiveMenu('ai');
-  };
-
-  // ============================================================================
-  // WORKABLE AI VISION MODEL INFERENCE & KAGGLE/APMC STANDARDS EVALUATION
-  // Multi-stage neural network progress bar (0% -> 100%) with defect evaluation
-  // ============================================================================
-  const handleRunAiAnalysis = () => {
-    setAiAnalyzing(true);
-    setAiProgress(0);
-    setAiInferenceStage('Stage 1/4: Initializing Neural Pipeline & Normalizing Crop Spectral Bands...');
-
-    const crop = currentFarmer.product || 'Potato';
-    const standards = CROP_QUALITY_STANDARDS[crop] || CROP_QUALITY_STANDARDS['Potato'];
-
-    const stages = [
-      { p: 25, text: `Stage 1/4: Image Preprocessing & Color Calibration (${standards.dataset})...` },
-      { p: 50, text: `Stage 2/4: Feature Extraction (ResNet-50 & YOLOv8-Agri Defect Bounding Boxes)...` },
-      { p: 75, text: `Stage 3/4: Morphological Sizing Caliper & Defect Necrosis Segmentation...` },
-      { p: 95, text: `Stage 4/4: Benchmarking with Indian APMC / Kaggle Tolerance Thresholds...` },
-      { p: 100, text: `Inference Complete: AI Inspection Report & Quality Grade Generated.` }
-    ];
-
-    let currentStageIdx = 0;
-    const interval = setInterval(() => {
-      setAiProgress((prev) => {
-        const next = prev + 5;
-        if (next >= stages[currentStageIdx]?.p && currentStageIdx < stages.length - 1) {
-          currentStageIdx++;
-          setAiInferenceStage(stages[currentStageIdx].text);
-        }
-        if (next >= 100) {
-          clearInterval(interval);
-          setAiAnalyzing(false);
-
-          // Calculate accurate results based on inspection parameters and standards
-          const rotten = Number(productInspection.rottenItems ?? standards.sampleDefaults.rottenItems);
-          const damaged = Number(productInspection.visibleDamage ?? standards.sampleDefaults.damagedItems);
-          const foreign = Number(productInspection.foreignMaterial ?? standards.sampleDefaults.foreignMaterial);
-          const sizeQ = standards.sampleDefaults.sizeQuality;
-
-          // Benchmark against APMC Tolerance Limits
-          const isRottenPass = rotten <= standards.metrics.maxRotten;
-          const isDamagedPass = damaged <= standards.metrics.maxDamaged;
-          const isForeignPass = foreign <= standards.metrics.maxForeign;
-          const isPass = isRottenPass && isDamagedPass && isForeignPass;
-
-          let score = Math.round(96 - (rotten * 3.8 + damaged * 2.2 + foreign * 4.5));
-          score = Math.max(45, Math.min(99, score));
-
-          const rec = isPass
-            ? `ACCEPT (${standards.sampleDefaults.grade} - High APMC Compliance)`
-            : `REJECT (Exceeds Defect Tolerance: Rotten ${rotten}% > max ${standards.metrics.maxRotten}%)`;
-
-          const assignedGrade = isPass ? standards.sampleDefaults.grade : 'Grade C / Rejected';
-          const rate = isPass ? standards.sampleDefaults.rate : Math.round(standards.sampleDefaults.rate * 0.7 * 100) / 100;
-          const total = Math.round(weighing.netWeight * rate * 100) / 100;
-
-          setAiReport({
-            rottenItems: rotten,
-            damagedItems: damaged,
-            foreignMaterial: foreign,
-            sizeQuality: sizeQ,
-            qualityScore: score,
-            confidence: Math.round((94.2 + Math.random() * 3.5) * 10) / 10,
-            recommendation: rec,
-            grade: assignedGrade,
-            analyzed: true,
-            loading: false
-          });
-
-          setDecision((prev) => ({
-            ...prev,
-            ratePerKg: rate,
-            totalAmount: total
-          }));
-
-          showToast(`AI Analysis Done: Score ${score}/100 [${rec}]`);
-          return 100;
-        }
-        return next;
-      });
-    }, 85);
-  };
-
-  // Confirm Purchase (PDF 1 Section 15)
-  const handleConfirmPurchase = async () => {
-    const total = Math.round(weighing.netWeight * decision.ratePerKg * 100) / 100;
-    try {
-      const res = await API.post('/bookings/confirm-purchase', {
-        bookingId: currentFarmer.bookingId,
-        netWeight: weighing.netWeight,
-        grade: aiReport.grade || 'Grade A',
-        ratePerKg: decision.ratePerKg,
-        totalAmount: total
-      });
-      setDecision({
-        ...decision,
-        status: 'Purchased',
-        purchaseDone: true,
-        rejectionDone: false,
-        purchaseId: res.data.purchaseId || decision.purchaseId,
-        totalAmount: total
-      });
-    } catch (e) {
-      setDecision({
-        ...decision,
-        status: 'Purchased',
-        purchaseDone: true,
-        rejectionDone: false,
-        totalAmount: total
-      });
-    }
-    showToast(`Purchase confirmed! Token ${currentFarmer.token} accepted. Payout: ₹${total.toLocaleString('en-IN')}`);
-    setActiveMenu('payments');
-  };
-
-  // Reject Product (PDF 1 Section 16)
-  const handleRejectProduct = async () => {
-    try {
-      await API.post('/bookings/reject-purchase', {
-        bookingId: currentFarmer.bookingId,
-        reason: decision.rejectReason,
-        remarks: decision.rejectRemarks
-      });
-    } catch (e) {}
-    setDecision({
-      ...decision,
-      status: 'Rejected',
-      rejectionDone: true,
-      purchaseDone: false
-    });
-    showToast(`Product rejected for Token ${currentFarmer.token}. Farmer notified immediately.`);
-  };
-
-  // Submit Mandatory Feedback (PDF 1 Section 19)
-  const handleSubmitFeedback = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post('/bookings/professional-feedback', {
-        bookingId: currentFarmer.bookingId,
-        farmerId: currentFarmer.bookingId,
-        subRatings: {
-          productQuality: feedback.productQuality,
-          cooperation: feedback.cooperation,
-          timeliness: feedback.timeliness,
-          overall: feedback.overall
-        },
-        comment: feedback.comment
-      });
-    } catch (e) {}
-    setFeedback({ ...feedback, submitted: true });
-    showToast('Mandatory professional feedback submitted successfully.');
-  };
-
-  // ============================================================================
-  // MANDATORY EVIDENCE COMPLAINT HANDLER
-  // Blocks submission without attached file and confirms registration
-  // ============================================================================
-  const handleEvidenceFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setComplaintForm((prev) => ({
-        ...prev,
-        evidenceFile: file,
-        evidenceName: file.name,
-        evidenceSize: `${(file.size / 1024).toFixed(1)} KB`
-      }));
-      setEvidenceError(null);
-    }
-  };
-
-  const handleSubmitComplaint = async (e) => {
-    e.preventDefault();
-    if (!complaintForm.evidenceFile) {
-      setEvidenceError('Supporting evidence is strictly mandatory! Please attach a photo, weighbridge slip, or inspection worksheet before submitting.');
-      return;
-    }
-    setEvidenceError(null);
-
-    try {
-      await API.post('/company/allegation', {
-        toUserId: currentFarmer.bookingId,
-        issueType: complaintForm.issue,
-        comment: complaintForm.description
-      });
-    } catch (e) {}
-
-    const ticketId = `CMP-${Math.floor(100000 + Math.random() * 900000)}`;
-    setComplaintSuccess(`Complaint #${ticketId} registered with evidence (${complaintForm.evidenceName}). Dispatched to Company Admin investigation queue.`);
-    showToast(`Complaint #${ticketId} filed with mandatory evidence.`);
-    setComplaintForm({
-      token: currentFarmer.token,
-      issue: 'Wrong weight',
-      description: '',
-      evidenceFile: null,
-      evidenceName: '',
-      evidenceSize: '',
-      submitted: true
-    });
-  };
-
-  // Live filter for Registered Farmers
-  const handleFarmerSearch = (query) => {
-    setSearchQuery(query);
-    if (!query.trim()) {
-      setSelectedFarmerProfile(REGISTERED_FARMERS[0]);
-      return;
-    }
-    const q = query.toLowerCase().trim();
-    const matched = REGISTERED_FARMERS.find(
-      (f) =>
-        f.name.toLowerCase().includes(q) ||
-        f.id.toLowerCase().includes(q) ||
-        f.phone.includes(q) ||
-        f.crop.toLowerCase().includes(q) ||
-        f.village.toLowerCase().includes(q) ||
-        f.token.toLowerCase().includes(q)
-    );
-    if (matched) {
-      setSelectedFarmerProfile(matched);
-    }
+  const handleStartFarmerProcurement = (farmerItem) => {
+    handleCallNextFarmer(farmerItem.token);
+    setActiveMenu('verify');
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
-      {/* =================================================== */}
-      {/* 1. HEADER (Matches PDF 1 Page 1 & Page 2 Section 2) */}
-      {/* =================================================== */}
-      <header className="bg-slate-950 border-b border-slate-800 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveMenu('dashboard')}>
-          <span className="text-2xl">🌱</span>
-          <div>
-            <h1 className="text-lg font-black tracking-wider text-emerald-400 flex items-center gap-1">
-              SMART PROCUREMENT SYSTEM
-            </h1>
-            <p className="text-[10px] text-slate-400 font-mono">Company Quality & Procurement Terminal</p>
-          </div>
+    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans antialiased flex flex-col">
+      
+      {/* Toast Floating Banner */}
+      {toastMsg && (
+        <div className="fixed top-16 right-4 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl text-xs font-mono font-bold flex items-center gap-2 border border-emerald-500/50 animate-bounce">
+          <Sparkles className="w-4 h-4 text-emerald-400" />
+          <span>{toastMsg}</span>
         </div>
+      )}
 
-        <div className="flex items-center space-x-4">
-          {/* Notification Bell with Badge */}
-          <div className="relative">
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4 text-amber-400" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                {notifications.length}
-              </span>
-            </button>
-
-            {/* Notifications Dropdown (PDF 1 Page 1 & 13) */}
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3 z-50 text-xs space-y-2">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                  <span className="font-bold text-amber-400 flex items-center gap-1">
-                    <Bell className="w-3.5 h-3.5" /> Notifications ({notifications.length})
-                  </span>
-                  <button onClick={() => setShowNotifications(false)} className="text-slate-400 hover:text-white">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                  {notifications.map((n) => (
-                    <div key={n.id} className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700/50">
-                      <div className="flex justify-between text-[11px] font-semibold">
-                        <span className={n.type === 'error' ? 'text-red-400' : n.type === 'warning' ? 'text-amber-300' : 'text-emerald-400'}>
-                          {n.title}
-                        </span>
-                        <span className="text-[10px] text-slate-500">{n.time}</span>
-                      </div>
-                      <p className="text-slate-300 text-[11px] mt-0.5">{n.text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Professional Profile Chip */}
-          <div className="flex items-center space-x-3 bg-slate-900 border border-slate-700/80 px-3 py-1.5 rounded-full text-xs">
-            <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs">
-              {profileData.name.charAt(0)}
+      {/* ========================================================================= */}
+      {/* 1. GOV / FCI PROCUREMENT AGENT HEADER BAR                                */}
+      {/* ========================================================================= */}
+      <header className="bg-[#004d35] text-white px-4 py-3 sm:px-6 shadow-md border-b border-emerald-600/40 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-950 via-teal-900 to-emerald-900 border-2 border-amber-400 p-0.5 shadow-md flex items-center justify-center overflow-hidden">
+              <img src="/agriprocure-logo.png" alt="AgriSetu Logo" className="w-full h-full object-contain" />
             </div>
-            <div className="hidden sm:block text-left leading-tight">
-              <span className="font-bold text-slate-100">{profileData.name}</span>
-              <span className="text-slate-400 text-[10px] block font-mono">
-                {profileData.id} | {profileData.centre}
+            <div>
+              <h1 className="text-sm sm:text-base font-black tracking-wider text-emerald-300 uppercase">
+                {at('portalTitle')}
+              </h1>
+              <span className="text-[10px] text-emerald-200/90 font-mono flex items-center gap-1">
+                <img src="/agent-avatar.png" className="w-3.5 h-3.5 rounded-full inline-block" alt="Agent" />
+                {at('portalSub')}{agentInfo.centre}
               </span>
             </div>
-
-            {/* Online / Offline Status Toggle */}
-            <button
-              onClick={() => setIsOnline(!isOnline)}
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                isOnline ? 'bg-emerald-950 text-emerald-300 border border-emerald-500' : 'bg-slate-800 text-slate-400 border border-slate-600'
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
-              {isOnline ? 'Online' : 'Offline'}
-            </button>
           </div>
 
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
+          <div className="flex items-center gap-3 text-xs">
+            {/* Language Capsule Pill */}
+            <div className="flex items-center bg-[#003827] p-1 rounded-xl border border-emerald-600/50 shadow-xs">
+              <Globe className="w-3.5 h-3.5 text-emerald-300 ml-1.5 mr-1" />
+              {['en', 'bn', 'hi'].map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setLanguage(l)}
+                  className={`px-2 py-0.5 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                    language === l ? 'bg-[#008b5e] text-white' : 'text-emerald-200 hover:text-white'
+                  }`}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <span className="hidden sm:inline font-mono text-emerald-100 font-bold bg-[#003827] px-3 py-1 rounded-xl border border-emerald-600/50">
+              {at('agentIdBadge')}{agentInfo.id} ({agentInfo.name})
+            </span>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 flex items-center gap-1 font-bold cursor-pointer transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{at('logout')}</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* =================================================== */}
-      {/* 2. BODY LAYOUT (Sidebar + Main Content Area) */}
-      {/* =================================================== */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* SIDEBAR (Matches PDF 1 Page 2 Section 3 & Page 17-18) */}
-        <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between shrink-0 p-3 space-y-1 select-none overflow-y-auto">
-          <div className="space-y-1">
-            <div className="px-3 py-1 text-[10px] font-mono tracking-widest text-slate-500 uppercase">
-              Main Operations
-            </div>
-
+      {/* Main Body with Sidebar Layout */}
+      <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row">
+        
+        {/* ========================================================================= */}
+        {/* 2. AGENT OPERATIONAL SIDEBAR                                              */}
+        {/* ========================================================================= */}
+        <aside className="w-full md:w-64 bg-[#004d35] text-emerald-100 p-4 space-y-6 flex-shrink-0 border-r border-emerald-600/40 shadow-xl">
+          
+          <nav className="space-y-4 text-xs font-semibold">
+            
+            {/* Group 1: Dashboard */}
             <button
               onClick={() => setActiveMenu('dashboard')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'dashboard'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
+              className={`w-full text-left p-2.5 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer ${
+                activeMenu === 'dashboard' ? 'bg-emerald-600 text-white font-black shadow-md' : 'hover:bg-emerald-900/80 text-emerald-200'
               }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
-              <span>Dashboard</span>
+              <LayoutDashboard className="w-4 h-4 text-emerald-400" />
+              <span>{at('agentDashboard')}</span>
             </button>
 
-            <button
-              onClick={() => setActiveMenu('queue')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'queue'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <Clock className="w-4 h-4" />
-              <span>Live Queue</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('verification')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'verification'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Verification</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('ai')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'ai'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>AI Quality Analysis</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('weighing')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'weighing'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <Scale className="w-4 h-4" />
-              <span>Weighing</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('purchases')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'purchases'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>Purchases</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('payments')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'payments'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <CreditCard className="w-4 h-4" />
-              <span>Payments</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('farmers')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'farmers'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40 font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Farmers</span>
-            </button>
-
-            <div className="pt-2 px-3 py-1 text-[10px] font-mono tracking-widest text-slate-500 uppercase">
-              Management & Quality
-            </div>
-
-            <button
-              onClick={() => setActiveMenu('feedback')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'feedback'
-                  ? 'bg-emerald-600 text-white shadow-md font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <Star className="w-4 h-4 text-amber-400" />
-              <span>Feedback</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('complaints')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'complaints'
-                  ? 'bg-emerald-600 text-white shadow-md font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <AlertTriangle className="w-4 h-4 text-amber-500" />
-              <span>Complaints</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('notifications')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'notifications'
-                  ? 'bg-emerald-600 text-white shadow-md font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <Bell className="w-4 h-4" />
-              <span>Notifications</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('profile')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'profile'
-                  ? 'bg-emerald-600 text-white shadow-md font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span>My Profile</span>
-            </button>
-
-            <button
-              onClick={() => setActiveMenu('settings')}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeMenu === 'settings'
-                  ? 'bg-emerald-600 text-white shadow-md font-bold'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
-            </button>
-          </div>
-
-          <div className="pt-4 border-t border-slate-800">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-bold text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-all cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </aside>
-
-        {/* MAIN WORKSPACE CONTENT */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-          {/* =================================================== */}
-          {/* 3. CALL NEXT FARMER ACTION BAR (PDF 1 Page 3-4) */}
-          {/* =================================================== */}
-          <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 border border-emerald-700/50 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+            {/* Group 2: Today's Work */}
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="bg-emerald-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                  Active Token: {currentFarmer.token}
-                </span>
-                <span className="text-xs text-emerald-300 font-semibold flex items-center gap-1.5">
-                  <Volume2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                  Counter 04 • {currentFarmer.farmerName} • {currentFarmer.product} ({currentFarmer.expectedQty} kg)
-                </span>
-              </div>
-              <p className="text-xs text-slate-300">
-                {callAlert}
-              </p>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/80 px-2 font-bold block">
+                {at('catTodaysWork')}
+              </span>
+              {[
+                { id: 'schedule', label: at('todaysSchedule'), icon: Calendar },
+                { id: 'pending', label: at('pendingTasks'), icon: Clock }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveMenu(item.id)}
+                  className={`w-full text-left p-2 rounded-xl flex items-center gap-2 transition-all cursor-pointer ${
+                    activeMenu === item.id ? 'bg-emerald-600 text-white font-black' : 'hover:bg-emerald-900/60 text-emerald-200'
+                  }`}
+                >
+                  <item.icon className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
             </div>
 
-            <div className="flex items-center gap-2 w-full md:w-auto">
+            {/* Group 3: Procurement Guided Workflow */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/80 px-2 font-bold block">
+                {at('catWorkflow')}
+              </span>
+              {[
+                { id: 'verify', label: at('step1Verify'), icon: QrCode },
+                { id: 'crop_verify', label: at('step2Crop'), icon: CheckCircle2 },
+                { id: 'quality', label: at('step3Quality'), icon: Sparkles },
+                { id: 'weighment', label: at('step4Weighment'), icon: Scale },
+                { id: 'decision', label: at('step5Decision'), icon: ShieldCheck }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveMenu(item.id)}
+                  className={`w-full text-left p-2 rounded-xl flex items-center gap-2 transition-all cursor-pointer ${
+                    activeMenu === item.id ? 'bg-emerald-600 text-white font-black' : 'hover:bg-emerald-900/60 text-emerald-200'
+                  }`}
+                >
+                  <item.icon className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Group 4: Transactions */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/80 px-2 font-bold block">
+                {at('catTransactions')}
+              </span>
               <button
-                onClick={() => handleCallNextFarmer()}
-                className="w-full md:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => setActiveMenu('transactions')}
+                className={`w-full text-left p-2 rounded-xl flex items-center gap-2 transition-all cursor-pointer ${
+                  activeMenu === 'transactions' ? 'bg-emerald-600 text-white font-black' : 'hover:bg-emerald-900/60 text-emerald-200'
+                }`}
               >
-                <Volume2 className="w-4 h-4" />
-                <span>📢 CALL NEXT FARMER</span>
+                <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{at('todaysTxns')}</span>
               </button>
             </div>
-          </div>
 
-          {/* =================================================== */}
-          {/* 4. FOUR TOP STATISTICS CARDS (PDF 1 Page 2-3) */}
-          {/* =================================================== */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl relative overflow-hidden">
-              <span className="text-xs text-slate-400 font-semibold block">① Farmers Arrived</span>
-              <div className="text-3xl font-black text-slate-100 mt-1">{stats.arrived}</div>
-              <span className="text-[11px] text-emerald-400 mt-1 block">Arrived at centre today</span>
+            {/* Group 5: Rulebook & Exceptions */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/80 px-2 font-bold block">
+                {at('catRules')}
+              </span>
+              {[
+                { id: 'rulebook', label: at('officialRulebook'), icon: FileText },
+                { id: 'exceptions', label: at('exceptionsDisputes'), icon: AlertTriangle }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveMenu(item.id)}
+                  className={`w-full text-left p-2 rounded-xl flex items-center gap-2 transition-all cursor-pointer ${
+                    activeMenu === item.id ? 'bg-emerald-600 text-white font-black' : 'hover:bg-emerald-900/60 text-emerald-200'
+                  }`}
+                >
+                  <item.icon className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
             </div>
 
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl relative overflow-hidden">
-              <span className="text-xs text-slate-400 font-semibold block">② Purchased</span>
-              <div className="text-3xl font-black text-emerald-400 mt-1">{stats.purchased}</div>
-              <span className="text-[11px] text-slate-400 mt-1 block">Successfully completed</span>
-            </div>
+          </nav>
+        </aside>
 
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl relative overflow-hidden">
-              <span className="text-xs text-slate-400 font-semibold block">③ Rejected</span>
-              <div className="text-3xl font-black text-red-400 mt-1">{stats.rejected}</div>
-              <span className="text-[11px] text-slate-400 mt-1 block">After verification</span>
-            </div>
-
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl relative overflow-hidden">
-              <span className="text-xs text-slate-400 font-semibold block">④ Waiting</span>
-              <div className="text-3xl font-black text-amber-400 mt-1">{stats.waiting}</div>
-              <span className="text-[11px] text-slate-400 mt-1 block">Farmers currently in queue</span>
-            </div>
-          </div>
-
-          {/* =================================================== */}
-          {/* 5. TAB VIEW ROUTER BASED ON SIDEBAR SELECTION */}
-          {/* =================================================== */}
-
-          {/* TAB 1: DASHBOARD OVERVIEW & LIVE QUEUE */}
+        {/* ========================================================================= */}
+        {/* 3. MAIN WORKBENCH / DASHBOARD CONTENT                                     */}
+        {/* ========================================================================= */}
+        <main className="flex-1 p-4 sm:p-6 space-y-5 overflow-y-auto">
+          
+          {/* HOME DASHBOARD VIEW */}
           {activeMenu === 'dashboard' && (
-            <div className="space-y-6">
-              {/* LIVE QUEUE TABLE (PDF 1 Page 3) */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-emerald-400" />
-                      Live Procurement Queue
-                    </h2>
-                    <p className="text-xs text-slate-400">Click any farmer to start or resume inspection.</p>
+            <div className="space-y-5">
+              
+              {/* Top Operational Status Banner */}
+              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                    <span>{at('goodMorning')}{agentInfo.id}</span>
+                    <span>👋</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    {agentInfo.centre} • {agentInfo.date}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleCallNextFarmer('#43')}
+                  className="py-2.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-2 cursor-pointer shadow-md shadow-emerald-600/20"
+                >
+                  <span>{at('callNextFarmerBtn')} (#{scheduleStats.next})</span>
+                </button>
+              </div>
+
+              {/* 4 Summary Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{at('kpiTodaysFarmers')}</span>
+                  <div className="text-2xl font-black font-mono text-slate-900">{scheduleStats.todaysFarmers}</div>
+                  <span className="text-[10px] text-slate-500">{at('subTotalBooked')}</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
+                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">{at('kpiCheckedIn')}</span>
+                  <div className="text-2xl font-black font-mono text-blue-600">{scheduleStats.checkedIn}</div>
+                  <span className="text-[10px] text-slate-500">{at('subAtYard')}</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">{at('kpiCompleted')}</span>
+                  <div className="text-2xl font-black font-mono text-emerald-600">{scheduleStats.completed}</div>
+                  <span className="text-[10px] text-slate-500">{at('subProcuredReceipted')}</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
+                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider block">{at('kpiPending')}</span>
+                  <div className="text-2xl font-black font-mono text-amber-600">{scheduleStats.pending}</div>
+                  <span className="text-[10px] text-slate-500">{at('subRemainingQueue')}</span>
+                </div>
+              </div>
+
+              {/* Live Queue & Capacity Dual Card */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="font-black text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                      {at('liveQueueTitle')}
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md">
+                      {at('counterActive')}
+                    </span>
                   </div>
-                  <span className="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
-                    Auto-refreshing live tokens
+
+                  <div className="space-y-1.5 font-mono text-xs">
+                    <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex justify-between font-bold text-emerald-900">
+                      <span>{at('nowServingLabel')}</span>
+                      <span className="text-sm font-black">Token #{scheduleStats.nowServing}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex justify-between text-slate-700">
+                      <span>{at('nextLabel')}</span>
+                      <span className="font-bold">Token #{scheduleStats.next}</span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex justify-between text-slate-700">
+                      <span>{at('yourNextLabel')}</span>
+                      <span className="font-bold">Token #{scheduleStats.yourNext}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveMenu('schedule')}
+                    className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs uppercase tracking-wider transition-all cursor-pointer"
+                  >
+                    {at('btnOpenFullQueue')}
+                  </button>
+                </div>
+
+                <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="font-black text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                      {at('capacityTitle')}
+                    </span>
+                    <span className="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md">
+                      {at('dailyMax500')}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-mono">
+                      <span className="text-slate-600 font-bold">{at('procuredTodayLabel')}</span>
+                      <span className="font-black text-slate-900">{scheduleStats.capacityUsed} / {scheduleStats.capacityTotal} Qtl</span>
+                    </div>
+
+                    <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden border border-slate-200 p-0.5">
+                      <div
+                        className="bg-emerald-600 h-full rounded-full transition-all"
+                        style={{ width: `${(scheduleStats.capacityUsed / scheduleStats.capacityTotal) * 100}%` }}
+                      />
+                    </div>
+
+                    <div className="flex justify-between text-[11px] font-mono text-slate-500 pt-1">
+                      <span>{at('utilisationRateLabel')} 72.4%</span>
+                      <span className="font-bold text-emerald-700">{at('remainingLabel')} 138 Qtl</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Farmer Action Card */}
+              <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 text-white shadow-lg border border-emerald-800 space-y-3">
+                <div className="flex justify-between items-center border-b border-emerald-800 pb-2">
+                  <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                    {at('nextFarmerTitle')}
                   </span>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                    {at('checkedInReady')}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                  <div>
+                    <span className="text-emerald-300/80 block text-[10px]">{at('lblTokenNo')}</span>
+                    <span className="text-lg font-black text-white">#{nextFarmerCard.tokenNumber}</span>
+                  </div>
+                  <div>
+                    <span className="text-emerald-300/80 block text-[10px]">{at('lblFarmerName')}</span>
+                    <span className="font-bold text-white">{nextFarmerCard.farmerName} ({nextFarmerCard.farmerId})</span>
+                  </div>
+                  <div>
+                    <span className="text-emerald-300/80 block text-[10px]">{at('lblDeclaredCrop')}</span>
+                    <span className="font-bold text-emerald-400">{trCrop(nextFarmerCard.crop)} ({nextFarmerCard.quantityQtl} Qtl)</span>
+                  </div>
+                  <div>
+                    <span className="text-emerald-300/80 block text-[10px]">{at('lblSlotWindow')}</span>
+                    <span className="font-bold text-white">{nextFarmerCard.slot}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => handleStartFarmerProcurement({ token: `#${nextFarmerCard.tokenNumber}` })}
+                    className="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md"
+                  >
+                    {at('btnStartJourney')}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* VIEW: TODAY'S SCHEDULE & QUEUE */}
+          {(activeMenu === 'schedule' || activeMenu === 'queue') && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-base">
+                      {at('scheduleTitle')}
+                    </h3>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={at('searchSchedulePlaceholder')}
+                      value={scheduleSearchQuery}
+                      onChange={(e) => setScheduleSearchQuery(e.target.value)}
+                      className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold w-64"
+                    />
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-300">
-                    <thead className="bg-slate-900/60 text-slate-400 font-mono uppercase text-[11px] border-b border-slate-800">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200">
                       <tr>
-                        <th className="p-3">Token</th>
-                        <th className="p-3">Farmer</th>
-                        <th className="p-3">Product</th>
-                        <th className="p-3">Qty</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Action</th>
+                        <th className="p-3">{at('thToken')}</th>
+                        <th className="p-3">{at('thFarmerDetails')}</th>
+                        <th className="p-3">{at('thCrop')}</th>
+                        <th className="p-3">{at('thDeclaredQty')}</th>
+                        <th className="p-3">{at('thSlotTime')}</th>
+                        <th className="p-3">{at('thStatus')}</th>
+                        <th className="p-3 text-right">{at('thAction')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
-                      {queueItems.map((item) => (
-                        <tr key={item.id} className="hover:bg-slate-900/80 transition-colors">
-                          <td className="p-3 font-mono font-bold text-emerald-400">{item.token}</td>
-                          <td className="p-3 font-semibold text-slate-100">{item.farmer}</td>
-                          <td className="p-3">{item.product}</td>
-                          <td className="p-3 font-mono">{item.qty}</td>
+                    <tbody className="divide-y divide-slate-100">
+                      {[...scheduleList]
+                        .sort((a, b) => {
+                          const order = { 'Done': 1, 'Serving': 2, 'Waiting': 3 };
+                          return (order[a.status] || 99) - (order[b.status] || 99);
+                        })
+                        .filter(item => item.farmer.toLowerCase().includes(scheduleSearchQuery.toLowerCase()) || item.token.includes(scheduleSearchQuery))
+                        .map((item) => (
+                        <tr key={item.token} className="hover:bg-slate-50">
+                          <td className="p-3 font-black text-base text-emerald-800">{item.token}</td>
+                          <td className="p-3 font-bold text-slate-900">{item.farmer}</td>
+                          <td className="p-3 font-semibold">{trCrop(item.crop)}</td>
+                          <td className="p-3 font-black text-slate-800">{item.qty} Qtl</td>
+                          <td className="p-3 text-slate-600">{item.time}</td>
                           <td className="p-3">
-                            <span
-                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                item.status === 'Purchased'
-                                  ? 'bg-emerald-950 text-emerald-400 border border-emerald-600'
-                                  : item.status === 'Rejected'
-                                  ? 'bg-red-950 text-red-400 border border-red-600'
-                                  : item.status === 'Processing'
-                                  ? 'bg-blue-950 text-blue-400 border border-blue-600 animate-pulse'
-                                  : 'bg-amber-950 text-amber-400 border border-amber-600'
-                              }`}
-                            >
-                              {item.status}
+                            <span className={`px-2.5 py-1 rounded-lg font-black text-[10px] ${
+                              item.status === 'Serving' ? 'bg-blue-600 text-white animate-pulse' :
+                              item.status === 'Done' ? 'bg-slate-200 text-slate-700' : 'bg-amber-500 text-white'
+                            }`}>
+                              {item.status === 'Serving' ? 'In Process' : trStatus(item.status)}
                             </span>
                           </td>
+                          <td className="p-3 text-right">
+                            {item.status === 'Done' && (
+                              <span className="px-3 py-1 bg-slate-100 text-slate-600 font-bold rounded-xl text-[11px] border border-slate-200 inline-block">
+                                Completed
+                              </span>
+                            )}
+                            {item.status === 'Serving' && (
+                              <span className="px-3 py-1 bg-blue-600 text-white font-bold rounded-xl text-[11px] inline-block shadow-sm animate-pulse">
+                                In Process
+                              </span>
+                            )}
+                            {item.status === 'Waiting' && (
+                              <button
+                                onClick={() => handleStartFarmerProcurement(item)}
+                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-[11px] cursor-pointer shadow-xs"
+                              >
+                                Start Procurement
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: PENDING TASKS (WAITING QUEUE NUMBERED FROM 1) */}
+          {activeMenu === 'pending' && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-base">
+                      📋 PENDING TASKS (WAITING QUEUE)
+                    </h3>
+                    <p className="text-[11px] text-slate-500">Showing all waiting farmers numbered from 1</p>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">S.No</th>
+                        <th className="p-3">{at('thToken')}</th>
+                        <th className="p-3">{at('thFarmerDetails')}</th>
+                        <th className="p-3">{at('thCrop')}</th>
+                        <th className="p-3">{at('thDeclaredQty')}</th>
+                        <th className="p-3">{at('thSlotTime')}</th>
+                        <th className="p-3">{at('thStatus')}</th>
+                        <th className="p-3 text-right">{at('thAction')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {scheduleList
+                        .filter(item => item.status === 'Waiting')
+                        .map((item, idx) => (
+                        <tr key={item.token} className="hover:bg-slate-50">
+                          <td className="p-3 font-black text-slate-900">#{idx + 1}</td>
+                          <td className="p-3 font-black text-base text-emerald-800">{item.token}</td>
+                          <td className="p-3 font-bold text-slate-900">{item.farmer}</td>
+                          <td className="p-3 font-semibold">{trCrop(item.crop)}</td>
+                          <td className="p-3 font-black text-slate-800">{item.qty} Qtl</td>
+                          <td className="p-3 text-slate-600">{item.time}</td>
                           <td className="p-3">
+                            <span className="px-2.5 py-1 rounded-lg font-black text-[10px] bg-amber-500 text-white">
+                              Waiting
+                            </span>
+                          </td>
+                          <td className="p-3 text-right">
                             <button
-                              onClick={() => {
-                                setCurrentFarmer({
-                                  ...currentFarmer,
-                                  token: item.token,
-                                  farmerName: item.farmer,
-                                  product: item.product,
-                                  phone: item.phone
-                                });
-                                setActiveMenu('verification');
-                              }}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded-lg text-[11px] transition-colors cursor-pointer"
+                              onClick={() => handleStartFarmerProcurement(item)}
+                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-[11px] cursor-pointer shadow-xs"
                             >
-                              {item.token} → Open Procurement
+                              Start Procurement
                             </button>
                           </td>
                         </tr>
@@ -1395,1736 +1270,862 @@ export default function ProfessionalDashboard() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* CENTRE STATUS BANNER (PDF 1 Page 13-14) */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-slate-200">CENTRE STATUS (Siliguri PC-01)</h3>
-                  <span className="text-xs text-amber-400 font-mono">Avg Time: {centreStatus.avgWaitMin} min</span>
-                </div>
+          {/* VIEW: WORKFLOW STEP 1 - VERIFY FARMER */}
+          {activeMenu === 'verify' && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h3 className="font-black text-slate-900 text-base border-b border-slate-100 pb-2">
+                  {at('verifyStepTitle')}
+                </h3>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Waiting Farmers</span>
-                    <div className="text-xl font-black text-amber-400 mt-1">{centreStatus.waiting}</div>
-                  </div>
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Currently Processing</span>
-                    <div className="text-xl font-black text-blue-400 mt-1">{centreStatus.processing}</div>
-                  </div>
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Completed</span>
-                    <div className="text-xl font-black text-emerald-400 mt-1">{centreStatus.completed}</div>
-                  </div>
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Centre Capacity</span>
-                    <div className="text-xl font-black text-purple-400 mt-1">{centreStatus.capacity}% Full</div>
-                  </div>
-                </div>
-
-                {centreStatus.isCongested && (
-                  <div className="p-3 bg-amber-950/40 border border-amber-600/50 rounded-xl text-xs text-amber-200 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                      <span>
-                        <strong>⚠️ HIGH CONGESTION DETECTED:</strong> Consider redirecting upcoming farmers to nearby centre{' '}
-                        <strong>{centreStatus.nearbySuggested.name}</strong> ({centreStatus.nearbySuggested.distance}, {centreStatus.nearbySuggested.waiting} waiting).
-                      </span>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* QR Scan Simulation Box */}
+                  <div className="p-6 rounded-2xl bg-slate-950 text-white text-center space-y-4 flex flex-col items-center justify-center">
+                    <QrCode className="w-20 h-20 text-emerald-400 animate-pulse" />
+                    <span className="font-bold text-sm block">{at('scanBoxTitle')}</span>
+                    <span className="text-[10px] text-emerald-400 bg-emerald-950 px-3 py-1 rounded-full border border-emerald-800">
+                      {at('scanCameraActive')}
+                    </span>
                     <button
-                      onClick={() => alert(`Redirect recommendation triggered to ${centreStatus.nearbySuggested.name}. Farmers within 15 km will see route recommendation.`)}
-                      className="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-3 py-1 rounded-lg text-xs shrink-0 cursor-pointer"
+                      onClick={() => showToast('Simulated QR Code Scan: Token #4 Token Verification Passed.')}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs cursor-pointer"
                     >
-                      Trigger Redirect
+                      {at('btnSimulateScan')}
                     </button>
                   </div>
-                )}
+
+                  {/* Verified Details Card */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <span className="font-black text-slate-900 block border-b border-slate-200 pb-1 text-xs">
+                      {at('verifiedDetailsTitle')}
+                    </span>
+                    <div className="flex justify-between py-1 border-b">
+                      <span className="text-slate-500">{at('lblFarmerName')}</span>
+                      <span className="font-bold text-slate-900">{activeSession.farmerName}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b">
+                      <span className="text-slate-500">{at('lblFarmerId')}</span>
+                      <span className="font-bold text-emerald-800">{activeSession.farmerId}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b">
+                      <span className="text-slate-500">{at('lblParchaRef')}</span>
+                      <span className="font-bold text-slate-900">P-SLG-2024-88</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b">
+                      <span className="text-slate-500">{at('lblMaxQuota')}</span>
+                      <span className="font-black text-emerald-700">50 Quintals</span>
+                    </div>
+
+                    <button
+                      onClick={() => setActiveMenu('crop_verify')}
+                      className="w-full py-2.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl cursor-pointer"
+                    >
+                      {at('btnNextStep2')}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: LIVE QUEUE VIEW */}
-          {activeMenu === 'queue' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-slate-100">Live Procurement Queue Management</h2>
-                <button onClick={handleCallNextFarmer} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer">
-                  📢 Call Next Farmer
-                </button>
-              </div>
-              <div className="grid sm:grid-cols-4 gap-3 text-xs">
-                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-amber-400 font-bold">
-                  Waiting: 14 Tokens
-                </div>
-                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-blue-400 font-bold">
-                  Arrived: 128 Farmers
-                </div>
-                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-purple-400 font-bold">
-                  Processing: 4 Tokens
-                </div>
-                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-emerald-400 font-bold">
-                  Completed: 96 Tokens
-                </div>
-              </div>
+          {/* VIEW: WORKFLOW STEP 2 - CROP VERIFICATION */}
+          {activeMenu === 'crop_verify' && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h3 className="font-black text-slate-900 text-base border-b border-slate-100 pb-2">
+                  {at('cropVerifyTitle')}
+                </h3>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-900 text-slate-400 font-mono uppercase text-[11px] border-b border-slate-800">
-                    <tr>
-                      <th className="p-3">Token</th>
-                      <th className="p-3">Farmer</th>
-                      <th className="p-3">Phone</th>
-                      <th className="p-3">Product</th>
-                      <th className="p-3">Expected Qty</th>
-                      <th className="p-3">Slot</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800">
-                    {queueItems.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-900 transition-colors">
-                        <td className="p-3 font-mono font-bold text-emerald-400">{item.token}</td>
-                        <td className="p-3 font-semibold text-slate-100">{item.farmer}</td>
-                        <td className="p-3 font-mono text-slate-400">{item.phone}</td>
-                        <td className="p-3">
-                          <span className="px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300 text-[11px] font-semibold">
-                            {item.product}
-                          </span>
-                        </td>
-                        <td className="p-3 font-mono">{item.qty}</td>
-                        <td className="p-3 font-mono text-slate-400">{item.time}</td>
-                        <td className="p-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                              item.status === 'Processing'
-                                ? 'bg-purple-950/80 text-purple-300 border-purple-600 animate-pulse'
-                                : item.status === 'Purchased'
-                                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600'
-                                : item.status === 'Rejected'
-                                ? 'bg-red-950/80 text-red-300 border-red-600'
-                                : 'bg-amber-950/80 text-amber-300 border-amber-600'
-                            }`}
-                          >
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          {item.status === 'Waiting' || item.status === 'Arrived' ? (
-                            <button
-                              onClick={() => handleCallNextFarmer(item.token)}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-[11px] flex items-center gap-1 cursor-pointer shadow-md transition-all hover:scale-105"
-                            >
-                              <Volume2 className="w-3 h-3" />
-                              <span>Call to Counter</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setCurrentFarmer({
-                                  ...currentFarmer,
-                                  token: item.token,
-                                  farmerName: item.farmer,
-                                  product: item.product,
-                                  phone: item.phone,
-                                  expectedQty: parseInt(item.qty) || 500
-                                });
-                                setActiveMenu(item.status === 'Purchased' ? 'payments' : 'verification');
-                              }}
-                              className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-1.5 rounded-lg text-[11px] cursor-pointer"
-                            >
-                              {item.status === 'Purchased' ? 'View Payment' : 'Open Workflow'}
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: STEP-BY-STEP VERIFICATION MODULE (PDF 1 Page 5) */}
-          {activeMenu === 'verification' && (
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Farmer Verification Box */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div className="border-b border-slate-800 pb-3">
-                  <span className="bg-emerald-950 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">
-                    Step 1 of 5
-                  </span>
-                  <h3 className="text-lg font-bold text-slate-100 mt-2">Farmer Identity Verification</h3>
-                  <p className="text-xs text-slate-400">Match physical arrival with booked appointment record.</p>
-                </div>
-
-                <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-xs font-mono space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Farmer Name:</span>
-                    <span className="font-bold text-slate-200">{currentFarmer.farmerName}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Farmer ID:</span>
-                    <span className="font-bold text-slate-200">{currentFarmer.farmerId}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Token Number:</span>
-                    <span className="font-bold text-emerald-400">{currentFarmer.token}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Crop Product:</span>
-                    <span className="font-bold text-slate-200">{currentFarmer.product}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Expected Quantity:</span>
-                    <span className="font-bold text-slate-200">{currentFarmer.expectedQty} KG</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Scheduled Slot:</span>
-                    <span className="font-bold text-slate-200">{currentFarmer.slot}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <label className="flex items-center gap-2 text-xs text-slate-200 cursor-pointer">
+                <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <label className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 font-bold cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={verification.farmerIdentity}
-                      onChange={(e) => setVerification({ ...verification, farmerIdentity: e.target.checked })}
-                      className="rounded accent-emerald-600 w-4 h-4"
+                      checked={activeSession.cropMatched}
+                      onChange={(e) => setActiveSession({...activeSession, cropMatched: e.target.checked})}
+                      className="w-4 h-4 accent-emerald-600"
                     />
-                    <span>✓ Farmer Identity Verified (Aadhaar / Land ID)</span>
+                    <span>{at('checkCropMatch')}</span>
                   </label>
 
-                  <label className="flex items-center gap-2 text-xs text-slate-200 cursor-pointer">
+                  <label className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 font-bold cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={verification.slotVerified}
-                      onChange={(e) => setVerification({ ...verification, slotVerified: e.target.checked })}
-                      className="rounded accent-emerald-600 w-4 h-4"
+                      checked={activeSession.packagingAcceptable}
+                      onChange={(e) => setActiveSession({...activeSession, packagingAcceptable: e.target.checked})}
+                      className="w-4 h-4 accent-emerald-600"
                     />
-                    <span>✓ Slot & Counter 04 Verified</span>
+                    <span>{at('checkPackaging')}</span>
                   </label>
 
-                  <label className="flex items-center gap-2 text-xs text-slate-200 cursor-pointer">
+                  <label className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 font-bold cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={verification.productVerified}
-                      onChange={(e) => setVerification({ ...verification, productVerified: e.target.checked })}
-                      className="rounded accent-emerald-600 w-4 h-4"
+                      checked={activeSession.presentedForSampling}
+                      onChange={(e) => setActiveSession({...activeSession, presentedForSampling: e.target.checked})}
+                      className="w-4 h-4 accent-emerald-600"
                     />
-                    <span>✓ Product Matches Booking ({currentFarmer.product})</span>
+                    <span>{at('checkSampling')}</span>
                   </label>
-                </div>
 
-                <button
-                  onClick={handleSaveFarmerVerification}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-lg cursor-pointer"
-                >
-                  [ VERIFY FARMER & PROCEED ]
-                </button>
-              </div>
-
-              {/* Product Verification Module (PDF 1 Page 5-6) */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div className="border-b border-slate-800 pb-3">
-                  <span className="bg-blue-950 text-blue-400 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">
-                    Step 2 of 5
-                  </span>
-                  <h3 className="text-lg font-bold text-slate-100 mt-2">Physical Product Quality Check</h3>
-                  <p className="text-xs text-slate-400">First quality verification before automated AI scan.</p>
-                </div>
-
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <label className="block text-slate-400 mb-1 font-semibold">Actual Stated Quantity (KG)</label>
-                    <input
-                      type="number"
-                      value={productInspection.actualQuantity}
-                      onChange={(e) => setProductInspection({ ...productInspection, actualQuantity: e.target.value })}
-                      className="input bg-slate-900 border-slate-800 text-slate-100"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 mb-1 font-semibold">Condition Rating</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {['Excellent', 'Good', 'Average', 'Poor'].map((cond) => (
-                        <button
-                          key={cond}
-                          type="button"
-                          onClick={() => setProductInspection({ ...productInspection, condition: cond })}
-                          className={`py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                            productInspection.condition === cond
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-slate-900 text-slate-400 border border-slate-800'
-                          }`}
-                        >
-                          {cond}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="block text-slate-400 text-[11px] mb-1">Visible Damage %</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={productInspection.visibleDamage}
-                        onChange={(e) => setProductInspection({ ...productInspection, visibleDamage: e.target.value })}
-                        className="input bg-slate-900 border-slate-800 text-slate-100"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-slate-400 text-[11px] mb-1">Rotten Items %</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={productInspection.rottenItems}
-                        onChange={(e) => setProductInspection({ ...productInspection, rottenItems: e.target.value })}
-                        className="input bg-slate-900 border-slate-800 text-slate-100"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-slate-400 text-[11px] mb-1">Foreign Material %</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={productInspection.foreignMaterial}
-                        onChange={(e) => setProductInspection({ ...productInspection, foreignMaterial: e.target.value })}
-                        className="input bg-slate-900 border-slate-800 text-slate-100"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 mb-1 font-semibold">Professional Remarks</label>
-                    <textarea
-                      rows="2"
-                      value={productInspection.remarks}
-                      onChange={(e) => setProductInspection({ ...productInspection, remarks: e.target.value })}
-                      className="input bg-slate-900 border-slate-800 text-slate-100"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleSaveProductInspection}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-lg cursor-pointer"
-                >
-                  [ SAVE INSPECTION & GO TO WEIGHING ]
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: WEIGHING MODULE (PDF 1 Page 6) */}
-          {activeMenu === 'weighing' && (
-            <div className="max-w-2xl mx-auto bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl">
-              <div className="border-b border-slate-800 pb-3 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                    <Scale className="w-5 h-5 text-emerald-400" />
-                    Digital Weighing Module
-                  </h3>
-                  <p className="text-xs text-slate-400">Connected to Weighbridge Terminal WS-04</p>
-                </div>
-                <span className="bg-emerald-950 text-emerald-400 text-xs font-mono font-bold px-3 py-1 rounded-full border border-emerald-700">
-                  DEVICE: {weighing.device} • ACTIVE
-                </span>
-              </div>
-
-              {/* Digital Indicator Terminal Box */}
-              <div className="bg-slate-900 p-6 rounded-2xl border-2 border-emerald-500/40 text-center space-y-4 font-mono shadow-inner">
-                <div className="text-xs text-emerald-400 tracking-widest uppercase">
-                  DIGITAL WEIGHT INDICATOR
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-left bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <div>
-                    <span className="text-[11px] text-slate-500 block">Gross Weight:</span>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={weighing.grossWeight}
-                      onChange={(e) => {
-                        const g = parseFloat(e.target.value) || 0;
-                        setWeighing({ ...weighing, grossWeight: g, netWeight: Math.max(0, g - weighing.tareWeight) });
-                      }}
-                      className="bg-transparent text-xl font-black text-slate-200 focus:outline-none border-b border-slate-700 w-full"
-                    />
-                    <span className="text-[10px] text-slate-500">KG (Vehicle + Crop)</span>
-                  </div>
-
-                  <div>
-                    <span className="text-[11px] text-slate-500 block">Tare Weight:</span>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={weighing.tareWeight}
-                      onChange={(e) => {
-                        const t = parseFloat(e.target.value) || 0;
-                        setWeighing({ ...weighing, tareWeight: t, netWeight: Math.max(0, weighing.grossWeight - t) });
-                      }}
-                      className="bg-transparent text-xl font-black text-slate-200 focus:outline-none border-b border-slate-700 w-full"
-                    />
-                    <span className="text-[10px] text-slate-500">KG (Vehicle Tare)</span>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-emerald-950/40 rounded-xl border border-emerald-500/50">
-                  <span className="text-xs text-emerald-300 font-bold uppercase tracking-widest block">
-                    NET CROP WEIGHT
-                  </span>
-                  <div className="text-4xl md:text-5xl font-black text-emerald-400 tracking-tight mt-1">
-                    {weighing.netWeight.toFixed(2)} <span className="text-xl">KG</span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-xs text-slate-500 pt-2">
-                  <span>Device: {weighing.device}</span>
-                  <span>Timestamp: {weighing.time}</span>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handleConfirmWeight}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-sm transition-all shadow-lg cursor-pointer"
-                >
-                  [ CONFIRM WEIGHT & PROCEED TO PHOTO CAPTURE ]
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: AI QUALITY ANALYSIS & PHOTO EVIDENCE (PDF 1 Page 6-8) */}
-          {activeMenu === 'ai' && (
-            <div className="space-y-6">
-              {/* Product Photo Capture Section (PDF 1 Page 6-7) */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                      <Camera className="w-5 h-5 text-emerald-400" />
-                      Product Evidence & Photo Capture
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Standard optical capture for AI vision inference ({currentFarmer.product} • Token {currentFarmer.token}).
-                    </p>
-                  </div>
                   <button
-                    onClick={handleRunAiAnalysis}
-                    disabled={aiAnalyzing}
-                    className={`${
-                      aiAnalyzing
-                        ? 'bg-purple-800 cursor-not-allowed text-purple-200'
-                        : 'bg-purple-600 hover:bg-purple-500 text-white cursor-pointer hover:scale-105'
-                    } font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg transition-all`}
+                    onClick={() => setActiveMenu('quality')}
+                    className="w-full py-2.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl cursor-pointer"
                   >
-                    <Sparkles className={`w-4 h-4 ${aiAnalyzing ? 'animate-spin text-amber-300' : 'text-amber-400'}`} />
-                    <span>{aiAnalyzing ? `Running Model (${aiProgress}%)` : 'Run AI Vision Model'}</span>
+                    {at('btnNextStep3')}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Front View', key: 'front' },
-                    { label: 'Top View', key: 'top' },
-                    { label: 'Sample Close-up', key: 'sample' },
-                    { label: 'Damage Spot', key: 'damage' }
-                  ].map((slot) => (
-                    <div key={slot.key} className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center space-y-2">
-                      <span className="text-xs font-bold text-slate-300 block">{slot.label}</span>
-                      <div className="aspect-video bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-center overflow-hidden relative">
-                        {photos[slot.key] ? (
-                          <img src={photos[slot.key]} alt={slot.label} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-[11px] text-slate-600">No Image</span>
-                        )}
-                        {/* Computer Vision Bounding Boxes Overlay for Sample Slot */}
-                        {slot.key === 'sample' && aiReport.analyzed && (
-                          <div className="absolute inset-0 pointer-events-none p-2 flex flex-col justify-between">
-                            <div className="border-2 border-emerald-400/90 bg-emerald-500/10 rounded w-2/3 h-2/3 relative">
-                              <span className="absolute -top-3 left-1 bg-emerald-600 text-white text-[8px] font-mono px-1 rounded font-bold shadow">
-                                Healthy: 98.4%
-                              </span>
-                            </div>
-                            <div className="self-end border-2 border-amber-400/90 bg-amber-500/10 rounded w-1/3 h-1/3 relative">
-                              <span className="absolute -bottom-3 right-1 bg-amber-600 text-white text-[8px] font-mono px-1 rounded font-bold shadow">
-                                Blemish: {aiReport.damagedItems}%
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <label className="block w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold rounded-lg cursor-pointer transition-colors">
-                        <Upload className="w-3 h-3 inline mr-1" />
-                        Upload
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              const url = URL.createObjectURL(e.target.files[0]);
-                              setPhotos({ ...photos, [slot.key]: url });
-                            }
-                          }}
-                        />
-                      </label>
+          {/* VIEW: WORKFLOW STEP 3 - QUALITY TESTING */}
+          {activeMenu === 'quality' && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h3 className="font-black text-slate-900 text-base border-b border-slate-100 pb-2">
+                  {at('qualityStepTitle')}
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* IoT Moisture Meter */}
+                  <div className="p-5 rounded-2xl bg-slate-950 text-white space-y-3">
+                    <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                      <span className="text-xs font-bold text-emerald-400">{at('moistureMeterTitle')}</span>
+                      <span className="text-[10px] bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded font-bold">ONLINE</span>
                     </div>
-                  ))}
+
+                    <div className="text-center py-4">
+                      <span className="text-3xl font-black text-emerald-400">13.5%</span>
+                      <span className="text-[10px] text-slate-400 block mt-1">{at('liveReadingLabel')}</span>
+                    </div>
+                  </div>
+
+                  {/* Quality Inputs */}
+                  <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">{at('lblMoistureActual')}</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={activeSession.moistureActual}
+                        onChange={(e) => setActiveSession({...activeSession, moistureActual: Number(e.target.value)})}
+                        className="w-full p-2 rounded-xl border bg-white font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">{at('lblForeignActual')}</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={activeSession.foreignMatterActual}
+                        onChange={(e) => setActiveSession({...activeSession, foreignMatterActual: Number(e.target.value)})}
+                        className="w-full p-2 rounded-xl border bg-white font-bold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">{at('lblDamagedActual')}</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={activeSession.damagedGrainActual}
+                        onChange={(e) => setActiveSession({...activeSession, damagedGrainActual: Number(e.target.value)})}
+                        className="w-full p-2 rounded-xl border bg-white font-bold"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => setActiveMenu('weighment')}
+                      className="w-full py-2.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl cursor-pointer"
+                    >
+                      {at('btnNextStep4')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: WORKFLOW STEP 4 - DIGITAL WEIGHMENT */}
+          {activeMenu === 'weighment' && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h3 className="font-black text-slate-900 text-base border-b border-slate-100 pb-2">
+                  {at('weighmentStepTitle')}
+                </h3>
+
+                <div className="p-5 rounded-2xl bg-slate-950 text-white space-y-4">
+                  <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                      <Scale className="w-4 h-4" />
+                      {at('scaleOnlineBadge')}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-bold">{at('lblGrossWeight')}</span>
+                      <span className="text-xl font-black text-white">{activeSession.grossWeightQtl} Qtl</span>
+                    </div>
+                    <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-bold">{at('lblTareWeight')}</span>
+                      <span className="text-xl font-black text-amber-400">{activeSession.tareWeightQtl} Qtl</span>
+                    </div>
+                    <div className="p-3 bg-emerald-950 rounded-xl border border-emerald-700">
+                      <span className="text-[10px] text-emerald-300 block font-bold">{at('lblNetGrainWeight')}</span>
+                      <span className="text-xl font-black text-emerald-400">{activeSession.netWeightQtl} Qtl</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveMenu('decision')}
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl cursor-pointer"
+                  >
+                    {at('btnNextStep5')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: WORKFLOW STEP 5 - PROCUREMENT DECISION */}
+          {activeMenu === 'decision' && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h3 className="font-black text-slate-900 text-base border-b border-slate-100 pb-2">
+                  {at('decisionStepTitle')}
+                </h3>
+
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <span className="font-black text-slate-900 block border-b border-slate-200 pb-1 text-xs">
+                    {at('purchaseSummaryTitle')}
+                  </span>
+
+                  <div className="flex justify-between py-1 border-b">
+                    <span className="text-slate-500">{at('lblNetWeightVal')}</span>
+                    <span className="font-black text-slate-900">{activeSession.netWeightQtl} Quintals</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b">
+                    <span className="text-slate-500">{at('lblMspRateVal')}</span>
+                    <span className="font-black text-emerald-800">₹{activeSession.mspRatePerQtl} / Qtl</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b">
+                    <span className="text-slate-500">{at('lblGrossValuation')}</span>
+                    <span className="font-bold text-slate-900">₹{activeSession.grossMspValue.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b text-red-600">
+                    <span>{at('lblQualityPenalty')}</span>
+                    <span>- ₹{activeSession.qualityAdjustmentTotal}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-t-2 border-slate-900 text-base font-black text-emerald-800">
+                    <span>{at('lblFinalPayable')}</span>
+                    <span>₹{activeSession.finalPayable.toLocaleString('en-IN')}</span>
+                  </div>
+
+                  <div className="pt-3 flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowReceiptModal(true);
+                        showToast(`Official Receipt ${activeSession.receiptId} generated!`);
+                      }}
+                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl cursor-pointer shadow-md"
+                    >
+                      {at('btnConfirmPrint')}
+                    </button>
+                    <button
+                      onClick={() => showToast('Produce rejected and logged to exceptions list.')}
+                      className="py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl cursor-pointer"
+                    >
+                      {at('btnRejectProduce')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: TRANSACTIONS */}
+          {activeMenu === 'transactions' && (
+            <div className="space-y-4 font-mono text-xs">
+              
+              {/* Summary Stats Header Bar from PDF Blueprint Page 1 (Updated Correct Operational Data) */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3 font-mono text-xs">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-slate-900 text-sm uppercase tracking-wider">TODAY'S TRANSACTIONS</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">18 September 2026</span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-semibold">Live Operational Sync</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center text-xs">
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-slate-400 block uppercase">TOTAL</span>
+                    <span className="text-base font-black text-slate-900">1,284</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-blue-600 block uppercase">CHECKED-IN</span>
+                    <span className="text-base font-black text-blue-600">1,146</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-amber-600 block uppercase">IN PROCESS</span>
+                    <span className="text-base font-black text-amber-600">72</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-emerald-600 block uppercase">COMPLETED</span>
+                    <span className="text-base font-black text-emerald-600">842</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-teal-700 block uppercase">ACCEPTED</span>
+                    <span className="text-base font-black text-teal-700">721</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-purple-700 block uppercase">ADJUSTED</span>
+                    <span className="text-base font-black text-purple-700">84</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-red-600 block uppercase">REJECTED</span>
+                    <span className="text-base font-black text-red-600">37</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[9px] font-bold text-orange-600 block uppercase">EXCEPTIONS</span>
+                    <span className="text-base font-black text-orange-600">18</span>
+                  </div>
                 </div>
               </div>
 
-              {/* AI Quality Analysis Report Card (PDF 1 Page 7) */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-5">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-800 pb-3 gap-2">
-                  <div>
-                    <span className="text-xs text-purple-400 font-mono font-bold tracking-widest uppercase flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                      DEEP VISION ANALYSIS (RESNET / YOLOv8 AGRI-MODEL)
-                    </span>
-                    <h3 className="text-xl font-bold text-slate-100 mt-1">Automated Quality Analysis Results</h3>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <span className="text-xs text-slate-400 block font-mono">Confidence: {aiReport.confidence}%</span>
-                    <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-600 inline-block mt-1">
-                      RECOMMENDATION: {aiReport.recommendation}
-                    </span>
-                  </div>
-                </div>
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h3 className="font-black text-slate-900 text-base border-b border-slate-100 pb-2 flex justify-between items-center">
+                  <span>{at('txnsTitle')}</span>
+                  <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+                    Total Records: {transactionsList.length}
+                  </span>
+                </h3>
 
-                {/* WORKABLE AI VISION INFERENCE PROGRESS BAR */}
-                {(aiAnalyzing || aiProgress > 0) && (
-                  <div className="bg-slate-900 border border-purple-600/50 rounded-xl p-4 space-y-3">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-mono font-bold text-purple-300 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-purple-400 animate-spin" />
-                        NEURAL VISION INFERENCE ENGINE (YOLOv8-AGRI & RESNET-50)
-                      </span>
-                      <span className="font-mono font-black text-emerald-400 text-sm">{aiProgress}%</span>
-                    </div>
-                    <div className="w-full bg-slate-950 rounded-full h-3.5 overflow-hidden border border-slate-800 p-0.5">
-                      <div
-                        className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-emerald-400 rounded-full transition-all duration-100 ease-out relative shadow-[0_0_12px_rgba(168,85,247,0.6)]"
-                        style={{ width: `${aiProgress}%` }}
-                      />
-                    </div>
-                    <div className="flex flex-col sm:flex-row justify-between sm:items-center text-[11px] text-slate-400 font-mono gap-1">
-                      <span className="text-slate-200">{aiInferenceStage || 'Inference engine standing by...'}</span>
-                      <span className="text-purple-400 font-semibold bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800 text-right">
-                        GPU TensorRT Accelerated
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* KEY DETECTED METRICS */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Rotten Items</span>
-                    <div className="text-xl font-bold text-emerald-400 mt-1">{aiReport.rottenItems}%</div>
-                  </div>
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Damaged Items</span>
-                    <div className="text-xl font-bold text-emerald-400 mt-1">{aiReport.damagedItems}%</div>
-                  </div>
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Foreign Material</span>
-                    <div className="text-xl font-bold text-emerald-400 mt-1">{aiReport.foreignMaterial}%</div>
-                  </div>
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Size Quality</span>
-                    <div className="text-xl font-bold text-blue-400 mt-1">{aiReport.sizeQuality}%</div>
-                  </div>
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 col-span-2 md:col-span-1">
-                    <span className="text-[10px] text-purple-300 uppercase font-bold">QUALITY SCORE</span>
-                    <div className="text-2xl font-black text-purple-400 mt-1">{aiReport.qualityScore}/100</div>
-                  </div>
-                </div>
-
-                {/* KAGGLE / APMC TOLERANCE LIMITS COMPARISON TABLE */}
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
-                    <div className="flex items-center gap-2">
-                      <Database className="w-4 h-4 text-emerald-400" />
-                      <span className="text-xs font-bold text-slate-200">
-                        Authentic APMC & Kaggle Dataset Benchmarks ({currentFarmer.product})
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono bg-emerald-950 text-emerald-300 px-2.5 py-0.5 rounded border border-emerald-600/40">
-                      Dataset: {(CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).dataset}
-                    </span>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs font-mono">
-                      <thead className="text-[10px] text-slate-400 uppercase bg-slate-950/60">
-                        <tr>
-                          <th className="p-2.5">Quality Parameter</th>
-                          <th className="p-2.5">Detected AI Value</th>
-                          <th className="p-2.5">APMC Tolerance Limit</th>
-                          <th className="p-2.5">Standard Source</th>
-                          <th className="p-2.5">Compliance Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-800 text-[11px]">
-                        <tr>
-                          <td className="p-2.5 font-semibold text-slate-200">Rotten / Mold Decayed</td>
-                          <td className="p-2.5 text-emerald-400 font-bold">{aiReport.rottenItems}%</td>
-                          <td className="p-2.5 text-slate-400">
-                            Max {(CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).metrics.maxRotten}%
-                          </td>
-                          <td className="p-2.5 text-slate-400">Kaggle ICAR Defect Spec</td>
-                          <td className="p-2.5">
-                            {aiReport.rottenItems <= (CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).metrics.maxRotten ? (
-                              <span className="text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-600">
-                                ✓ PASSED APMC
-                              </span>
-                            ) : (
-                              <span className="text-red-400 font-bold bg-red-950/60 px-2 py-0.5 rounded border border-red-600">
-                                ✗ EXCEEDED LIMIT
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="p-2.5 font-semibold text-slate-200">Visible Damage / Bruising</td>
-                          <td className="p-2.5 text-emerald-400 font-bold">{aiReport.damagedItems}%</td>
-                          <td className="p-2.5 text-slate-400">
-                            Max {(CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).metrics.maxDamaged}%
-                          </td>
-                          <td className="p-2.5 text-slate-400">BIS Indian Standard IS:1484</td>
-                          <td className="p-2.5">
-                            {aiReport.damagedItems <= (CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).metrics.maxDamaged ? (
-                              <span className="text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-600">
-                                ✓ PASSED APMC
-                              </span>
-                            ) : (
-                              <span className="text-red-400 font-bold bg-red-950/60 px-2 py-0.5 rounded border border-red-600">
-                                ✗ EXCEEDED LIMIT
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="p-2.5 font-semibold text-slate-200">Foreign Material / Sand</td>
-                          <td className="p-2.5 text-emerald-400 font-bold">{aiReport.foreignMaterial}%</td>
-                          <td className="p-2.5 text-slate-400">
-                            Max {(CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).metrics.maxForeign}%
-                          </td>
-                          <td className="p-2.5 text-slate-400">APMC Mandi Grading Schedule</td>
-                          <td className="p-2.5">
-                            {aiReport.foreignMaterial <= (CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).metrics.maxForeign ? (
-                              <span className="text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-600">
-                                ✓ PASSED APMC
-                              </span>
-                            ) : (
-                              <span className="text-red-400 font-bold bg-red-950/60 px-2 py-0.5 rounded border border-red-600">
-                                ✗ EXCEEDED LIMIT
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="p-2.5 font-semibold text-slate-200">Size Caliper Uniformity</td>
-                          <td className="p-2.5 text-blue-400 font-bold">{aiReport.sizeQuality}%</td>
-                          <td className="p-2.5 text-slate-400">
-                            Min {(CROP_QUALITY_STANDARDS[currentFarmer.product] || CROP_QUALITY_STANDARDS.Potato).metrics.minSizeQuality}%
-                          </td>
-                          <td className="p-2.5 text-slate-400">Morphological Caliper Metric</td>
-                          <td className="p-2.5">
-                            <span className="text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-600">
-                              ✓ PASSED APMC
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">Trans ID</th>
+                        <th className="p-3">{at('thFarmerDetails')}</th>
+                        <th className="p-3">{at('thCrop')}</th>
+                        <th className="p-3">{at('thNetWeight')}</th>
+                        <th className="p-3">{at('thTotalPayable')}</th>
+                        <th className="p-3">{at('thStatus')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {transactionsList.map((txn) => (
+                        <tr key={txn.receiptId} className="hover:bg-slate-50">
+                          <td className="p-3 font-black text-emerald-800">{txn.txnId || txn.receiptId}</td>
+                          <td className="p-3 font-bold text-slate-900">{txn.farmerName} ({txn.farmerId})</td>
+                          <td className="p-3 font-semibold">{trCrop(txn.crop)}</td>
+                          <td className="p-3 font-black text-slate-800">{txn.netWeightQtl} Qtl</td>
+                          <td className="p-3 font-black text-emerald-700">₹{txn.finalPayable.toLocaleString('en-IN')}</td>
+                          <td className="p-3">
+                            <span className="px-2.5 py-1 rounded-lg font-black text-[10px] bg-emerald-600 text-white">
+                              {txn.status || 'COMPLETED'}
                             </span>
                           </td>
                         </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Final Decision Buttons (PDF 1 Page 8 Section 14) */}
-                <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row gap-4">
-                  <button
-                    onClick={handleConfirmPurchase}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-xl text-sm transition-all shadow-xl shadow-emerald-900/30 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-5 h-5" />
-                    <span>[ ✅ ACCEPT PRODUCT & CONFIRM PURCHASE ]</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveMenu('purchases')}
-                    className="flex-1 bg-red-600/80 hover:bg-red-600 text-white font-black py-4 rounded-xl text-sm transition-all shadow-xl shadow-red-900/30 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                    <span>[ ❌ REJECT PRODUCT (WITH EVIDENCE) ]</span>
-                  </button>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 6: PURCHASES & REJECTION CONFIRMATION (PDF 1 Page 8-10) */}
-          {activeMenu === 'purchases' && (
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Purchase Confirmation Card (PDF 1 Page 8-9) */}
-              <div className="bg-slate-950 border border-emerald-700/60 rounded-2xl p-6 space-y-4 shadow-xl">
-                <div className="border-b border-slate-800 pb-3 flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5" />
-                    PURCHASE CONFIRMATION
-                  </h3>
-                  <span className="text-xs font-mono bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded">
-                    {decision.purchaseId}
+          {/* VIEW: OFFICIAL RULEBOOK (COMPLETE 11 OPERATIONAL SECTIONS FROM BLUEPRINT PAGES 23-32) */}
+          {activeMenu === 'rulebook' && (
+            <div className="space-y-6 font-mono text-xs">
+              
+              {/* Header Banner */}
+              <div className="p-5 rounded-3xl bg-emerald-950 text-white shadow-lg border border-emerald-800 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                    📋 Procurement Officer Rulebook • Standard Operating Procedure (SOP)
+                  </span>
+                  <span className="text-[10px] bg-emerald-900 text-emerald-300 font-bold px-2.5 py-1 rounded-md border border-emerald-700">
+                    KMS 2025-26 & RMS 2025-26
                   </span>
                 </div>
-
-                <div className="space-y-2 text-xs font-mono bg-slate-900 p-4 rounded-xl border border-slate-800">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Farmer:</span>
-                    <span className="font-bold text-slate-100">{currentFarmer.farmerName}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Product:</span>
-                    <span className="font-bold text-slate-100">{currentFarmer.product}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Net Weight:</span>
-                    <span className="font-bold text-emerald-400">{weighing.netWeight} KG</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Assigned Grade:</span>
-                    <span className="font-bold text-slate-100">Grade A</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Rate:</span>
-                    <span className="font-bold text-slate-100">₹{decision.ratePerKg.toFixed(2)}/KG</span>
-                  </div>
-                  <div className="flex justify-between text-base font-bold text-emerald-400 border-t border-slate-800 pt-2">
-                    <span>TOTAL PAYOUT:</span>
-                    <span>₹{decision.totalAmount.toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-
-                <div className="text-xs space-y-1 text-slate-400">
-                  <div>✓ AI Verification: Passed (91/100)</div>
-                  <div>✓ Weight: WS-04 Certified ({weighing.netWeight} kg)</div>
-                  <div>✓ Professional: Verified by {profileData.name}</div>
-                  <div>✓ Photo Evidence: 3 Photos Attached</div>
-                </div>
-
-                <button
-                  onClick={handleConfirmPurchase}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs transition-all shadow-lg cursor-pointer"
-                >
-                  [ CONFIRM PURCHASE & DISBURSE PAYMENT ]
-                </button>
+                <h3 className="text-lg font-black text-white">Farmer MSP Procurement Platform SOP</h3>
+                <p className="text-xs text-emerald-200/90 leading-relaxed">
+                  <strong>Audience:</strong> Procurement Centre Officers, Grading Assistants, Weighment Operators, and Designated Purchasing Authority at government-notified procurement centres.
+                </p>
               </div>
 
-              {/* Rejection Module (PDF 1 Page 9-10) */}
-              <div className="bg-slate-950 border border-red-800/60 rounded-2xl p-6 space-y-4 shadow-xl">
-                <div className="border-b border-slate-800 pb-3">
-                  <h3 className="text-lg font-bold text-red-400 flex items-center gap-2">
-                    <X className="w-5 h-5" />
-                    REJECTION MODULE
-                  </h3>
-                  <p className="text-xs text-slate-400">If product fails threshold, specify verified reason with evidence.</p>
+              {/* Section 1: Role & Authority Matrix */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  1. Role & Authority Matrix
+                </h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5 w-1/3">ROLE</th>
+                        <th className="p-2.5">AUTHORITY & RESPONSIBILITIES</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-900">Grading Assistant</td>
+                        <td className="p-2.5 text-slate-700">Draw sample, record raw measurements (moisture, FM, damage %). Cannot finalize Accept/Reject decision alone.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-900">Quality Control Officer</td>
+                        <td className="p-2.5 text-slate-700">Reviews measurements against the active Uniform Specification, applies value-cut slab, issues the graded verdict (Accept / Discount / Reject).</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-900">Weighment Operator</td>
+                        <td className="p-2.5 text-slate-700">Records gross/tare/net weight on the calibrated digital scale. Cannot override a reading without QC sign-off.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-900">Procurement Officer / Centre In-Charge</td>
+                        <td className="p-2.5 text-slate-700">Final purchasing authority. Approves the transaction, authorizes payment initiation, and is the first point of escalation for farmer disputes.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold text-slate-900">District Marketing / Procurement Officer</td>
+                        <td className="p-2.5 text-slate-700">Second-level escalation. Reviews disputed rejections, relaxation-order applicability, and complaint appeals.</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-[11px] font-bold text-amber-900">
+                  📌 Rule: No single role can complete a transaction end-to-end alone — grading, weighment, and final approval are deliberately separated so every purchase has more than one recorded sign-off.
+                </div>
+              </div>
 
-                <div className="space-y-2 text-xs">
-                  <label className="block text-slate-400 font-semibold">Select Primary Reason:</label>
+              {/* Section 2: Pre-Session Checklist (Before Gate Opens) */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  2. Pre-Session Checklist (Before Gate Opens)
+                </h4>
+                <div className="space-y-1.5 font-mono text-xs">
                   {[
-                    'Poor Quality',
-                    'Excess Rotten Items',
-                    'Excess Damage',
-                    'Foreign Material',
-                    'Wrong Product',
-                    'Other'
-                  ].map((reason) => (
-                    <label key={reason} className="flex items-center gap-2 text-slate-300 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="rejectionReason"
-                        checked={decision.rejectReason === reason}
-                        onChange={() => setDecision({ ...decision, rejectReason: reason })}
-                        className="accent-red-500"
-                      />
-                      <span>{reason}</span>
+                    "Confirm today's active MSP rate matches the current CCEA notification",
+                    "Confirm active Uniform Specification version (check for any season/district relaxation order in force)",
+                    "Verify weighment scale calibration certificate is current",
+                    "Confirm moisture meter is calibrated and battery-checked",
+                    "Confirm centre capacity (remaining quintals) is correctly loaded in the system before slots are honoured",
+                    "Confirm token/queue display is functioning",
+                    "Review any pending complaints assigned to this centre"
+                  ].map((chk, i) => (
+                    <label key={i} className="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl border border-slate-100 text-slate-800 font-bold cursor-pointer">
+                      <input type="checkbox" defaultChecked className="accent-emerald-600 w-4 h-4" />
+                      <span>{chk}</span>
                     </label>
                   ))}
                 </div>
-
-                <div>
-                  <label className="block text-slate-400 text-xs font-semibold mb-1">Remarks for Farmer</label>
-                  <textarea
-                    rows="2"
-                    value={decision.rejectRemarks}
-                    onChange={(e) => setDecision({ ...decision, rejectRemarks: e.target.value })}
-                    placeholder="Specify evidence and reason for rejection..."
-                    className="input bg-slate-900 border-slate-800 text-slate-100"
-                  />
-                </div>
-
-                <button
-                  onClick={handleRejectProduct}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-black py-3 rounded-xl text-xs transition-all shadow-lg cursor-pointer"
-                >
-                  [ CONFIRM REJECTION & NOTIFY FARMER ]
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 7: PAYMENTS MODULE (PDF 1 Page 10) */}
-          {activeMenu === 'payments' && (
-            <div className="max-w-xl mx-auto bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
-              <div className="border-b border-slate-800 pb-3 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-emerald-400" />
-                  PAYMENT DISBURSEMENT TRACKER
-                </h3>
-                <span className="text-xs bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded font-bold border border-emerald-600">
-                  Processing
-                </span>
-              </div>
-
-              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-xs font-mono space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Purchase ID:</span>
-                  <span className="font-bold text-slate-100">{decision.purchaseId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Farmer:</span>
-                  <span className="font-bold text-slate-100">{currentFarmer.farmerName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Mobile:</span>
-                  <span className="font-bold text-slate-100">{currentFarmer.phone}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Bank Account:</span>
-                  <span className="font-bold text-slate-100">SBI •••• 1234 (Verified)</span>
-                </div>
-                <div className="flex justify-between text-emerald-400 font-bold border-t border-slate-800 pt-2">
-                  <span>Amount Credited:</span>
-                  <span>₹{decision.totalAmount.toLocaleString('en-IN')}</span>
+                <div className="p-3 bg-red-50 border border-red-200 rounded-2xl text-[11px] font-bold text-red-900">
+                  ⚠️ Warning: An officer should not begin grading if any of the first three items cannot be confirmed — these directly affect every transaction's legal validity for the day.
                 </div>
               </div>
 
-              <div className="p-3 bg-emerald-950/40 border border-emerald-600/40 rounded-xl text-xs text-emerald-300 flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Payment request pushed to banking system. Farmer SMS receipt sent automatically.</span>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowDigitalReceipt(true)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all hover:bg-slate-600"
-                >
-                  <FileText className="w-4 h-4 text-emerald-400" />
-                  <span>View Digital Receipt</span>
-                </button>
-                <button
-                  onClick={() => setActiveMenu('feedback')}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs cursor-pointer"
-                >
-                  Proceed to Mandatory Feedback →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 8: FARMER MANAGEMENT & SEARCH (PDF 1 Page 10-11) */}
-          {activeMenu === 'farmers' && (
-            <div className="space-y-6">
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                      <Users className="w-5 h-5 text-emerald-400" />
-                      Farmer Directory & Historical Records
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Search by Farmer ID, Name, Mobile, Crop, or Token to view complete APMC procurement history.
-                    </p>
+              {/* Section 3: On Farmer Arrival — Verification Sequence */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  3. On Farmer Arrival — Verification Sequence
+                </h4>
+                <div className="space-y-2 font-mono text-xs">
+                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between font-bold text-slate-900">
+                    <span>1. Scan QR / verify Booking ID</span>
+                    <span>✓</span>
                   </div>
-                  <span className="text-xs font-mono text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded-full border border-emerald-600/40">
-                    {REGISTERED_FARMERS.length} Registered Farmers
-                  </span>
-                </div>
-
-                {/* SEARCH BAR */}
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
-                    <input
-                      className="input pl-9 bg-slate-900 border-slate-800 text-slate-100 font-mono text-xs"
-                      placeholder="Type Farmer Name (e.g. Gurpreet), ID (FARM-...), Phone, Crop (Wheat), or Token..."
-                      value={searchQuery}
-                      onChange={(e) => handleFarmerSearch(e.target.value)}
-                    />
+                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between font-bold text-slate-900">
+                    <span>2. Confirm farmer identity matches booking record</span>
+                    <span>✓</span>
                   </div>
-                  {searchQuery && (
-                    <button
-                      onClick={() => handleFarmerSearch('')}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2 rounded-xl text-xs cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  )}
+                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between font-bold text-slate-900">
+                    <span>3. Confirm booked crop matches produce brought</span>
+                    <span>✓</span>
+                  </div>
+                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between font-bold text-slate-900">
+                    <span>4. Confirm booked slot window is current</span>
+                    <span>✓</span>
+                  </div>
+                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between font-bold text-slate-900">
+                    <span>5. Assign/verify queue token → Proceed to sampling</span>
+                    <span>✓</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-slate-100 border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-800">
+                  📌 Rejection at this stage (before grading even begins) applies only for: mismatched identity, mismatched crop, or arrival outside the valid slot/grace window — never for produce quality, which is assessed only at the grading stage.
+                </div>
+              </div>
+
+              {/* Section 4: Sampling Procedure */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  4. Sampling Procedure
+                </h4>
+                <div className="space-y-2 text-xs text-slate-700 font-mono">
+                  <p>• Draw sample per notified sampling method (spear/probe sampling across multiple points in the lot — never from a single scoop).</p>
+                  <p>• Combine into one representative composite sample.</p>
+                  <p>• Split: one portion for testing, one retained (sealed) for dispute reference.</p>
+                  <p>• Log sample ID against Booking ID.</p>
+                </div>
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-[11px] font-bold text-emerald-950">
+                  📌 Rule: A retained, sealed counter-sample is mandatory. If a farmer disputes a grading result later, this sample — not memory or re-testing fresh produce — is the reference used for re-verification.
+                </div>
+              </div>
+
+              {/* Section 5: Grading Decision Procedure & Value-Cut Slabs */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  5. Grading Decision Procedure & Active Value-Cut Slabs
+                </h4>
+
+                <div className="space-y-2">
+                  <span className="font-bold text-slate-900 block text-xs">Paddy — Base Moisture Limit 17.0%:</span>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1 font-mono text-[11px]">
+                    <div>• <strong>≤ 17.0%</strong> → No cut, full MSP (Rs 2,369 / Rs 2,389 per Qtl)</div>
+                    <div>• <strong>17.01% – 22.0%*</strong> → 1% value cut per 1% (or part) excess moisture</div>
+                    <div className="text-red-600">• <strong>&gt; 22.0%</strong> → Reject</div>
+                  </div>
+                  <p className="text-[10px] text-slate-500 italic">* The 22.0% outer ceiling applies only under an active state relaxation order (e.g., wet-harvest relief). Default central ceiling is tighter.</p>
                 </div>
 
-                {/* FILTERED QUICK SELECTION CHIPS */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <span className="text-[11px] text-slate-500 self-center">Matching Farmers:</span>
-                  {REGISTERED_FARMERS.filter((f) => {
-                    if (!searchQuery.trim()) return true;
-                    const q = searchQuery.toLowerCase().trim();
-                    return (
-                      f.name.toLowerCase().includes(q) ||
-                      f.id.toLowerCase().includes(q) ||
-                      f.phone.includes(q) ||
-                      f.crop.toLowerCase().includes(q) ||
-                      f.village.toLowerCase().includes(q) ||
-                      f.token.toLowerCase().includes(q)
-                    );
-                  }).map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => setSelectedFarmerProfile(f)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer ${
-                        selectedFarmerProfile?.id === f.id
-                          ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-900/50'
-                          : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800'
-                      }`}
-                    >
-                      <User className="w-3 h-3" />
-                      <span>{f.name}</span>
-                      <span className="text-[10px] opacity-75">({f.crop})</span>
-                    </button>
+                <div className="space-y-2 pt-1">
+                  <span className="font-bold text-slate-900 block text-xs">Wheat — Base Moisture Limit 12.0%:</span>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1 font-mono text-[11px]">
+                    <div>• <strong>≤ 12.0%</strong> → No cut, full MSP (Rs 2,425 per Qtl)</div>
+                    <div>• <strong>12.01% – 14.0%</strong> → 1% value cut per 1% (or part) excess moisture</div>
+                    <div className="text-red-600">• <strong>&gt; 14.0%</strong> → Reject</div>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-slate-600">
+                  Non-moisture parameters (foreign matter, damaged/discoloured, shrivelled, admixture): graded strictly Accept/Reject against the base limit unless the current season's DFPD circular explicitly publishes a value-cut rate for that parameter. If no cut rate is published, a lot exceeding the base limit is rejected outright — the officer must not estimate or invent a discount.
+                </p>
+
+                <div className="p-4 bg-slate-900 text-white rounded-2xl space-y-2 font-mono text-[11px]">
+                  <span className="text-emerald-400 font-bold block text-xs border-b border-slate-800 pb-1">MANDATORY GRADING RECORD FIELDS</span>
+                  <div className="grid grid-cols-2 gap-2 text-slate-300">
+                    <div>Booking ID: __________</div>
+                    <div>Officer ID: __________</div>
+                    <div>Sample ID: __________</div>
+                    <div>Timestamp: __________</div>
+                    <div>Moisture: ___%</div>
+                    <div>Foreign Matter: ___%</div>
+                    <div>Damaged/Discoloured: ___%</div>
+                    <div>Shrivelled: ___%</div>
+                    <div>Final Verdict: ACCEPT / DISCOUNT / REJECT</div>
+                    <div>Value Cut Applied: Rs ___/quintal</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 6: Weighment Procedure */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  6. Weighment Procedure
+                </h4>
+                <div className="space-y-1.5 font-mono text-xs text-slate-700">
+                  <p>1. Place Lot on Calibrated Digital Scale</p>
+                  <p>2. Record GROSS WEIGHT (system-captured, not manual entry where connected scale is available)</p>
+                  <p>3. Record TARE WEIGHT (empty container/vehicle)</p>
+                  <p>4. NET WEIGHT = GROSS − TARE</p>
+                  <p>5. Convert to Quintals → lock the figure into the transaction</p>
+                </div>
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-[11px] font-bold text-amber-900">
+                  📌 Rule: Any manual override of a digital reading requires a logged reason and a second officer's sign-off (typically the Centre In-Charge). Unexplained manual overrides should be flagged for the District Marketing Officer's review during routine audit.
+                </div>
+              </div>
+
+              {/* Section 7: Payment Authorization Procedure */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  7. Payment Authorization Procedure
+                </h4>
+                <div className="space-y-1.5 font-mono text-xs text-slate-700">
+                  <p>• Net Quantity × Applicable MSP (post value-cut, if any)</p>
+                  <p>• Officer reviews computed Final Payable Amount against the Grading Record and Weighment Record</p>
+                  <p>• Officer authorizes → Transaction finalized</p>
+                  <p>• Payment pushed to DBT pipeline: Pending → Processing → Processed → Credited</p>
+                </div>
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-[11px] font-bold text-emerald-950">
+                  📌 Rule: The officer authorizing payment must be someone other than whoever performed the grading, wherever centre staffing allows — this separation is what makes a later audit trail meaningful.
+                </div>
+              </div>
+
+              {/* Section 8: Handling a Farmer Dispute at the Counter */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  8. Handling a Farmer Dispute at the Counter (Dispute Protocol)
+                </h4>
+                <div className="space-y-2 font-mono text-xs text-slate-700">
+                  <p>1. Farmer disputes grading/weighment result.</p>
+                  <p>2. Officer explains the specific parameter, measured value, and cited rule (never a vague "it failed quality check").</p>
+                  <p>3. If farmer still disputes: Retrieve SEALED counter-sample → re-test in farmer's presence (or refer to next-level QC if re-test infrastructure isn't available on-site).</p>
+                  <p>4. If unresolved: Officer files a Complaint on the farmer's behalf with full transaction context attached, and informs the farmer of the Complaint ID and expected response window.</p>
+                </div>
+                <div className="p-3 bg-red-50 border border-red-200 rounded-2xl text-[11px] font-bold text-red-900">
+                  📌 Rule: An officer must never simply tell a farmer to "come back later" without logging a Complaint ID — every disputed transaction needs a traceable record, even if it's resolved on the spot.
+                </div>
+              </div>
+
+              {/* Section 9: End-of-Day Reconciliation */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  9. End-of-Day Reconciliation
+                </h4>
+                <div className="space-y-1.5 font-mono text-xs">
+                  {[
+                    "Total quintals procured today vs. capacity allocated",
+                    "Count of Accepted / Discounted / Rejected lots",
+                    "All Grading Records signed and archived",
+                    "All Weighment Records match Payment authorizations (no orphaned records either direction)",
+                    "Any manual scale overrides flagged and reasoned",
+                    "Any relaxation order applied today logged with reference number",
+                    "Pending complaints updated with today's status & remaining centre capacity updated for tomorrow's slot availability"
+                  ].map((rec, i) => (
+                    <label key={i} className="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl border border-slate-100 text-slate-800 font-bold cursor-pointer">
+                      <input type="checkbox" defaultChecked className="accent-emerald-600 w-4 h-4" />
+                      <span>{rec}</span>
+                    </label>
                   ))}
                 </div>
               </div>
 
-              {/* FARMER PROFILE CARD */}
-              {selectedFarmerProfile && (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4 font-mono text-xs shadow-xl">
-                  <div className="border-b border-slate-800 pb-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                    <div>
-                      <span className="text-emerald-400 font-bold text-sm block">
-                        {selectedFarmerProfile.name}
-                      </span>
-                      <span className="text-slate-400 text-[11px]">
-                        {selectedFarmerProfile.village}, {selectedFarmerProfile.district} • Mobile: {selectedFarmerProfile.phone}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="bg-slate-900 px-3 py-1 rounded-full text-slate-300 border border-slate-800">
-                        ID: {selectedFarmerProfile.id}
-                      </span>
-                      <span className="bg-amber-950/60 text-amber-300 px-2.5 py-1 rounded-full border border-amber-600/40">
-                        ⭐ {selectedFarmerProfile.rating} / 5.0
-                      </span>
-                    </div>
-                  </div>
+              {/* Section 10: Escalation Matrix & Prohibitions */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2">
+                  10. Escalation Matrix & Mandatory Prohibitions
+                </h4>
 
-                  <div className="grid sm:grid-cols-4 gap-3">
-                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-500 block">Total Purchases</span>
-                      <div className="text-xl font-bold text-slate-100 mt-1">
-                        {selectedFarmerProfile.purchases} Procurements
-                      </div>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-500 block">Total Quantity Delivered</span>
-                      <div className="text-xl font-bold text-emerald-400 mt-1">
-                        {selectedFarmerProfile.quantityKg?.toLocaleString('en-IN')} KG
-                      </div>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-500 block">Total Payout Disbursed</span>
-                      <div className="text-xl font-bold text-blue-400 mt-1">
-                        ₹{selectedFarmerProfile.value?.toLocaleString('en-IN')}
-                      </div>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-500 block">Verified Bank Account</span>
-                      <div className="text-sm font-bold text-slate-200 mt-1 truncate">
-                        {selectedFarmerProfile.bankAccount}
-                      </div>
-                      <span className="text-[10px] text-slate-500">{selectedFarmerProfile.ifsc}</span>
-                    </div>
-                  </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5 w-1/2">ISSUE TYPE</th>
+                        <th className="p-2.5">ESCALATE TO</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      <tr><td className="p-2.5 font-bold">Grading dispute (unresolved)</td><td className="p-2.5 text-emerald-800 font-bold">District Marketing / Procurement Officer</td></tr>
+                      <tr><td className="p-2.5 font-bold">Suspected relaxation-order applicability question</td><td className="p-2.5 text-emerald-800 font-bold">District Marketing / Procurement Officer</td></tr>
+                      <tr><td className="p-2.5 font-bold">Scale calibration failure</td><td className="p-2.5 text-emerald-800 font-bold">Technical / Weights & Measures Authority</td></tr>
+                      <tr><td className="p-2.5 font-bold">Payment / DBT failure</td><td className="p-2.5 text-emerald-800 font-bold">Payment Settlement Cell</td></tr>
+                      <tr><td className="p-2.5 font-bold">Staff conduct complaint</td><td className="p-2.5 text-emerald-800 font-bold">Centre In-Charge → District Authority</td></tr>
+                      <tr><td className="p-2.5 font-bold">Suspected quantity/quality fraud pattern</td><td className="p-2.5 text-emerald-800 font-bold">District Authority + Flagged for Audit</td></tr>
+                    </tbody>
+                  </table>
+                </div>
 
-                  {/* 4 WORKABLE HISTORICAL RECORD BUTTONS */}
-                  <div className="pt-2">
-                    <span className="text-slate-400 font-bold block mb-2 font-sans text-xs">
-                      Click to View Complete Verified Historical Records:
-                    </span>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-slate-200">
-                      <button
-                        onClick={() => setActiveHistoryModal('quality')}
-                        className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 hover:border-emerald-500 text-left border border-slate-800 cursor-pointer transition-all shadow group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-emerald-400">📁 Quality Reports</span>
-                          <span className="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded">
-                            {selectedFarmerProfile.qualityReports?.length || 0} Records
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1 group-hover:text-slate-200 font-sans">
-                          Past AI & Lab defect inspection certificates
-                        </p>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveHistoryModal('weighbridge')}
-                        className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 hover:border-blue-500 text-left border border-slate-800 cursor-pointer transition-all shadow group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-blue-400">📜 Weighbridge Slips</span>
-                          <span className="text-[10px] bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded">
-                            {selectedFarmerProfile.weighbridgeHistory?.length || 0} Slips
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1 group-hover:text-slate-200 font-sans">
-                          Gross, tare & net weigh scale tickets
-                        </p>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveHistoryModal('payments')}
-                        className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 hover:border-purple-500 text-left border border-slate-800 cursor-pointer transition-all shadow group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-purple-400">💳 Payments Ledger</span>
-                          <span className="text-[10px] bg-purple-950 text-purple-300 px-1.5 py-0.5 rounded">
-                            {selectedFarmerProfile.paymentsLedger?.length || 0} UTRs
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1 group-hover:text-slate-200 font-sans">
-                          Bank DBT settlement & transaction receipts
-                        </p>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveHistoryModal('photo')}
-                        className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 hover:border-amber-500 text-left border border-slate-800 cursor-pointer transition-all shadow group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-amber-400">🖼️ AI Photo Evidence</span>
-                          <span className="text-[10px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded">
-                            {selectedFarmerProfile.photoEvidence?.length || 0} Photos
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1 group-hover:text-slate-200 font-sans">
-                          High-res crop defect scan archives
-                        </p>
-                      </button>
-                    </div>
+                <div className="p-4 bg-red-950 text-white rounded-2xl space-y-2 font-mono text-xs">
+                  <span className="text-red-400 font-black block text-sm border-b border-red-800 pb-1">
+                    WHAT THE OFFICER MUST NEVER DO (MANDATORY PROHIBITIONS)
+                  </span>
+                  <div className="space-y-1.5 text-red-200 font-bold">
+                    <p>✘ Apply last season's MSP or specification to a current transaction</p>
+                    <p>✘ Apply a relaxed moisture ceiling without a verified active order</p>
+                    <p>✘ Estimate a value-cut rate for a parameter with no published rate</p>
+                    <p>✘ Finalize Accept/Reject without recording measured values</p>
+                    <p>✘ Override a digital weighment reading without a logged reason and second sign-off</p>
+                    <p>✘ Turn away a disputed farmer without issuing a Complaint ID</p>
+                    <p>✘ Authorize payment for a transaction lacking a matching Grading Record and Weighment Record</p>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 9: MANDATORY FEEDBACK (PDF 1 Page 11-12) */}
-          {activeMenu === 'feedback' && (
-            <div className="max-w-xl mx-auto bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
-              <div className="border-b border-slate-800 pb-3">
-                <span className="text-amber-400 text-xs font-bold uppercase tracking-wider block">
-                  Mandatory after completed procurement
-                </span>
-                <h3 className="text-xl font-bold text-slate-100 mt-1">Professional → Farmer Rating</h3>
-                <p className="text-xs text-slate-400">Rate farmer across key performance and quality parameters.</p>
               </div>
 
-              <form onSubmit={handleSubmitFeedback} className="space-y-4 text-xs">
-                {[
-                  { key: 'productQuality', label: 'PRODUCT QUALITY' },
-                  { key: 'cooperation', label: 'COOPERATION' },
-                  { key: 'timeliness', label: 'TIMELINESS' },
-                  { key: 'overall', label: 'OVERALL RATING' }
-                ].map((crit) => (
-                  <div key={crit.key} className="flex justify-between items-center bg-slate-900 p-3 rounded-xl border border-slate-800">
-                    <span className="font-semibold text-slate-200">{crit.label}</span>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setFeedback({ ...feedback, [crit.key]: star })}
-                          className={`text-lg cursor-pointer ${star <= feedback[crit.key] ? 'text-amber-400' : 'text-slate-600'}`}
-                        >
-                          ★
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Comment</label>
-                  <textarea
-                    rows="3"
-                    value={feedback.comment}
-                    onChange={(e) => setFeedback({ ...feedback, comment: e.target.value })}
-                    className="input bg-slate-900 border-slate-800 text-slate-100"
-                    placeholder="Write detailed assessment..."
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-xs shadow-lg cursor-pointer"
-                >
-                  [ SUBMIT MANDATORY FEEDBACK ]
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* TAB 10: COMPLAINT MODULE (PDF 1 Page 12-13) */}
-          {activeMenu === 'complaints' && (
-            <div className="max-w-xl mx-auto bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
-              <div className="border-b border-slate-800 pb-3">
-                <span className="text-red-400 text-xs font-bold uppercase tracking-wider block">
-                  Dispute & Grievance Recording
-                </span>
-                <h3 className="text-xl font-bold text-slate-100 mt-1">Complaint Module</h3>
-                <p className="text-xs text-slate-400">
-                  Log farmer or professional grievance with mandatory supporting evidence for Company Admin investigation.
+              {/* Section 11: Grading Decision Console */}
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h4 className="font-black text-slate-900 text-sm border-b border-slate-100 pb-2 flex justify-between items-center">
+                  <span>11. FAQ Norms — Grading Decision Console</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">
+                    Active KMS 2025-26 Standard
+                  </span>
+                </h4>
+                <p className="text-xs text-slate-600">
+                  Use this at the grading counter to check a sample against active Uniform Specification and value-cut slabs before recording the verdict on the Grading Record.
                 </p>
-              </div>
 
-              <form onSubmit={handleSubmitComplaint} className="space-y-4 text-xs">
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Procurement / Token</label>
-                  <input
-                    value={complaintForm.token}
-                    onChange={(e) => setComplaintForm({ ...complaintForm, token: e.target.value })}
-                    className="input bg-slate-900 border-slate-800 text-slate-100 font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Select Issue Category</label>
-                  <select
-                    value={complaintForm.issue}
-                    onChange={(e) => setComplaintForm({ ...complaintForm, issue: e.target.value })}
-                    className="input bg-slate-900 border-slate-800 text-slate-100"
-                  >
-                    <option value="Wrong weight">Wrong weight</option>
-                    <option value="Unfair rejection">Unfair rejection</option>
-                    <option value="Wrong grading">Wrong grading</option>
-                    <option value="Behaviour">Professional behaviour</option>
-                    <option value="Payment issue">Payment issue</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">Detailed Description *</label>
-                  <textarea
-                    rows="3"
-                    value={complaintForm.description}
-                    onChange={(e) => setComplaintForm({ ...complaintForm, description: e.target.value })}
-                    placeholder="State facts, scale discrepancy, or reasons clearly..."
-                    className="input bg-slate-900 border-slate-800 text-slate-100"
-                    required
-                  />
-                </div>
-
-                {/* MANDATORY SUPPORTING EVIDENCE FIELD */}
-                <div>
-                  <label className="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
-                    <span>
-                      Attach Supporting Evidence <span className="text-red-400 font-bold">* (Mandatory)</span>
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-normal">Photo / Weigh Slip / Lab Sheet</span>
-                  </label>
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 font-mono text-xs">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Paddy Moisture Measured (%):</label>
                     <input
-                      type="file"
-                      accept="image/*,.pdf,.doc,.docx"
-                      required
-                      onChange={handleEvidenceFileChange}
-                      className="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-slate-800 file:text-emerald-400 file:font-semibold hover:file:bg-slate-700 cursor-pointer bg-slate-900 rounded-xl border border-slate-800 p-2"
+                      type="number"
+                      step="0.1"
+                      value={activeSession.moistureActual}
+                      onChange={(e) => setActiveSession({...activeSession, moistureActual: Number(e.target.value)})}
+                      className="w-full p-2.5 rounded-xl border bg-white font-bold"
                     />
-
-                    {complaintForm.evidenceFile && (
-                      <div className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-600/40 text-xs text-emerald-300">
-                        <div className="flex items-center gap-2 truncate">
-                          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span className="truncate font-mono font-semibold">{complaintForm.evidenceName}</span>
-                          <span className="text-[10px] text-slate-400">({complaintForm.evidenceSize})</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setComplaintForm((prev) => ({
-                              ...prev,
-                              evidenceFile: null,
-                              evidenceName: '',
-                              evidenceSize: ''
-                            }))
-                          }
-                          className="text-slate-400 hover:text-red-400 text-xs px-2 py-0.5 rounded cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    )}
-
-                    {evidenceError && (
-                      <div className="p-2.5 bg-red-950/60 border border-red-600 rounded-lg text-xs text-red-300 flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                        <span>{evidenceError}</span>
-                      </div>
-                    )}
-
-                    {complaintSuccess && (
-                      <div className="p-2.5 bg-emerald-950/60 border border-emerald-600 rounded-lg text-xs text-emerald-300 flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>{complaintSuccess}</span>
-                      </div>
-                    )}
                   </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3.5 rounded-xl text-xs shadow-lg cursor-pointer transition-all hover:scale-[1.01]"
-                >
-                  [ SUBMIT COMPLAINT WITH EVIDENCE TO ADMIN REVIEW ]
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* TAB 11: NOTIFICATIONS LIST (PDF 1 Page 13) */}
-          {activeMenu === 'notifications' && (
-            <div className="max-w-2xl mx-auto bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-              <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-amber-400" />
-                Notification Center
-              </h3>
-
-              <div className="space-y-2">
-                {notifications.map((n) => (
-                  <div key={n.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-start">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                        <h4 className="font-bold text-slate-100 text-sm">{n.title}</h4>
-                      </div>
-                      <p className="text-xs text-slate-400">{n.text}</p>
-                    </div>
-                    <span className="text-[11px] text-slate-500 font-mono">{n.time}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 12: MY PROFILE (PDF 1 Page 14) */}
-          {activeMenu === 'profile' && (
-            <div className="max-w-xl mx-auto bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl font-mono text-xs">
-              <div className="border-b border-slate-800 pb-3 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-emerald-400">MY PROFESSIONAL PROFILE</h3>
-                <button
-                  onClick={() => setIsEditingProfile(!isEditingProfile)}
-                  className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 rounded-lg text-xs cursor-pointer"
-                >
-                  {isEditingProfile ? 'Done' : 'Edit Profile'}
-                </button>
-              </div>
-
-              <div className="space-y-3 bg-slate-900 p-4 rounded-xl border border-slate-800">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Name:</span>
-                  <span className="font-bold text-slate-100">{profileData.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Professional ID:</span>
-                  <span className="font-bold text-emerald-400">{profileData.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Company:</span>
-                  <span className="font-bold text-slate-100">{profileData.company}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Assigned Centre:</span>
-                  <span className="font-bold text-slate-100">{profileData.centre}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Inspector Rating:</span>
-                  <span className="font-bold text-amber-400">⭐ {profileData.rating} / 5.0</span>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2">
-                <span className="text-slate-400 font-bold block">Today's Work Summary:</span>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Farmers Served:</span>
-                  <span className="font-bold text-slate-100">128</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Purchased:</span>
-                  <span className="font-bold text-emerald-400">96</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Rejected:</span>
-                  <span className="font-bold text-red-400">18</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 13: SETTINGS (PDF 1 Page 18) */}
-          {activeMenu === 'settings' && (
-            <div className="max-w-xl mx-auto bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4">
-              <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                <Settings className="w-5 h-5 text-slate-400" />
-                Terminal & Device Settings
-              </h3>
-
-              <div className="space-y-3 text-xs">
-                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 flex justify-between items-center">
                   <div>
-                    <strong className="text-slate-200">Weighbridge Device IP</strong>
-                    <p className="text-slate-500">Connected to 192.168.1.44 (WS-04 Digital Scale)</p>
+                    <label className="font-bold text-slate-700 block mb-1">Foreign Matter Measured (%):</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={activeSession.foreignMatterActual}
+                      onChange={(e) => setActiveSession({...activeSession, foreignMatterActual: Number(e.target.value)})}
+                      className="w-full p-2.5 rounded-xl border bg-white font-bold"
+                    />
                   </div>
-                  <span className="text-emerald-400 font-bold">Connected</span>
                 </div>
 
-                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 flex justify-between items-center">
+                <div className="p-4 bg-emerald-950 text-white rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
                   <div>
-                    <strong className="text-slate-200">Camera / Vision Stream</strong>
-                    <p className="text-slate-500">High-resolution procurement inspection optics</p>
+                    <span className="text-slate-400 block text-[10px]">EVALUATED VERDICT:</span>
+                    <span className="text-base font-black text-emerald-400">
+                      {activeSession.moistureActual <= 17.0 ? 'ACCEPT (FULL MSP Rs 2,389/QTL)' :
+                       activeSession.moistureActual <= 22.0 ? `ACCEPT WITH DISCOUNT (1% CUT: Rs ${(2389 * 0.01 * (activeSession.moistureActual - 17)).toFixed(2)}/QTL)` :
+                       'REJECT (EXCEEDS MOISTURE CEILING 22.0%)'}
+                    </span>
                   </div>
-                  <span className="text-emerald-400 font-bold">Ready</span>
+                  <span className="text-[10px] bg-emerald-900 text-emerald-300 font-bold px-3 py-1.5 rounded-xl border border-emerald-700">
+                    Source: DFPD/FCI Uniform Specifications 2025-26
+                  </span>
                 </div>
+              </div>
 
-                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <div>
-                    <strong className="text-slate-200">Sound & Audio Announcer</strong>
-                    <p className="text-slate-500">Token audio call announcements for waiting queue</p>
-                  </div>
-                  <input type="checkbox" defaultChecked className="accent-emerald-500 w-4 h-4" />
+            </div>
+          )}
+
+          {/* VIEW: EXCEPTIONS & DISPUTES */}
+          {activeMenu === 'exceptions' && (
+            <div className="space-y-4 font-mono text-xs">
+              <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
+                <h3 className="font-black text-slate-900 text-base border-b border-slate-100 pb-2">
+                  {at('exceptionsTitle')}
+                </h3>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">{at('thExceptionId')}</th>
+                        <th className="p-3">{at('thDisputeType')}</th>
+                        <th className="p-3">{at('thFarmerDetails')}</th>
+                        <th className="p-3">{at('thParameter')}</th>
+                        <th className="p-3">{at('thStatus')}</th>
+                        <th className="p-3 text-right">{at('thAction')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {exceptionsList.map((ex) => (
+                        <tr key={ex.id} className="hover:bg-slate-50">
+                          <td className="p-3 font-black text-amber-800">{ex.id}</td>
+                          <td className="p-3 font-bold text-slate-900">{ex.type}</td>
+                          <td className="p-3">{ex.farmer}</td>
+                          <td className="p-3 font-semibold">{ex.parameter || 'Weight'}</td>
+                          <td className="p-3 font-bold">{trStatus(ex.status)}</td>
+                          <td className="p-3 text-right">
+                            <button
+                              onClick={() => showToast(`Inspecting dispute ${ex.id}`)}
+                              className="px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-300 font-bold rounded-lg text-[11px] cursor-pointer"
+                            >
+                              {at('btnInspectDispute')}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
           )}
+
         </main>
       </div>
 
-      {/* ============================================================================ */}
-      {/* AUTHENTIC DIGITAL PROCUREMENT RECEIPT & TAX INVOICE MODAL (APMC / MANDI)      */}
-      {/* ============================================================================ */}
-      {showDigitalReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="bg-slate-950 border-2 border-emerald-500/60 rounded-2xl w-full max-w-2xl text-slate-100 shadow-2xl relative overflow-hidden font-mono text-xs my-auto">
-            {/* Watermark / Header Strip */}
-            <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-950 border-b border-emerald-600/40 p-4 flex justify-between items-start">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">🌾</span>
-                  <div>
-                    <h2 className="text-sm sm:text-base font-black tracking-wider text-emerald-400">
-                      AGRICULTURAL PRODUCE MARKET COMMITTEE (APMC)
-                    </h2>
-                    <p className="text-[10px] text-slate-400">
-                      Department of Agriculture Marketing • Central Procurement Division, Siliguri Yard
-                    </p>
-                  </div>
-                </div>
-                <div className="text-[10px] text-emerald-300 font-sans">
-                  Official Procurement Tax Invoice & Direct Benefit Transfer Voucher (Form APMC-9)
-                </div>
-              </div>
+      {/* ========================================================================= */}
+      {/* 4. PRINTABLE OFFICIAL RECEIPT MODAL                                       */}
+      {/* ========================================================================= */}
+      {showReceiptModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 text-slate-800 shadow-2xl space-y-4 font-mono">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 className="font-black text-slate-900 text-base">{at('receiptHeaderTitle')}</h3>
               <button
-                onClick={() => setShowDigitalReceipt(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+                onClick={() => {
+                  setShowReceiptModal(false);
+                  setSelectedTxnForReceipt(null);
+                }}
+                className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-4 sm:p-6 space-y-4 max-h-[78vh] overflow-y-auto">
-              {/* Top Meta Bar */}
-              <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-wrap justify-between items-center gap-2">
-                <div>
-                  <span className="text-[10px] text-slate-400 block">Voucher / Receipt No:</span>
-                  <span className="font-bold text-emerald-400 text-xs sm:text-sm">
-                    REC-2026-{decision.purchaseId}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block">Date & Time:</span>
-                  <span className="font-semibold text-slate-200">
-                    {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}, {weighing.time}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block">Token / Counter:</span>
-                  <span className="font-bold text-amber-300">{currentFarmer.token} • Counter 04</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block">NABL Weighbridge:</span>
-                  <span className="font-semibold text-slate-200">Scale {weighing.device}</span>
-                </div>
-              </div>
+            {(() => {
+              const r = selectedTxnForReceipt || {
+                receiptId: activeSession.receiptId,
+                farmerName: activeSession.farmerName,
+                farmerId: activeSession.farmerId,
+                crop: activeSession.declaredCrop,
+                netWeightQtl: activeSession.netWeightQtl,
+                mspRate: activeSession.mspRatePerQtl,
+                finalPayable: activeSession.finalPayable,
+                centre: 'PC-BNK-001 (Siliguri)',
+                date: '18-09-2026'
+              };
 
-              {/* Farmer and Quality Information 2-column */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-                  <span className="text-emerald-400 font-bold block border-b border-slate-800 pb-1 text-[11px]">
-                    FARMER BENEFICIARY DETAILS
-                  </span>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Farmer Name:</span>
-                    <span className="font-bold text-slate-100">{currentFarmer.farmerName}</span>
+              return (
+                <div className="space-y-2 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-slate-500">Receipt No:</span>
+                    <span className="font-black text-emerald-800">{r.receiptId}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Farmer ID:</span>
-                    <span className="font-bold text-slate-100">{currentFarmer.farmerId}</span>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-slate-500">Farmer Name:</span>
+                    <span className="font-bold text-slate-900">{r.farmerName} ({r.farmerId})</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Mobile No:</span>
-                    <span className="text-slate-200">{currentFarmer.phone}</span>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-slate-500">Procurement Centre:</span>
+                    <span className="font-bold text-slate-900">{r.centre || 'PC-BNK-001'}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Bank Account:</span>
-                    <span className="text-emerald-300 font-semibold">SBI •••• 1234 (Verified)</span>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-slate-500">Procured Crop:</span>
+                    <span className="font-bold text-slate-900">{trCrop(r.crop)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Payment Mode:</span>
-                    <span className="text-slate-200">DBT / Immediate NEFT</span>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-slate-500">Net Grain Weight:</span>
+                    <span className="font-black text-slate-900">{r.netWeightQtl} Quintals</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-slate-500">MSP Rate:</span>
+                    <span className="font-bold text-emerald-800">₹{r.mspRate} / Qtl</span>
+                  </div>
+                  <div className="flex justify-between pt-2 text-sm font-black text-emerald-800 border-t-2 border-slate-900">
+                    <span>TOTAL PAYABLE:</span>
+                    <span>₹{r.finalPayable.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
+              );
+            })()}
 
-                <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-                  <span className="text-purple-400 font-bold block border-b border-slate-800 pb-1 text-[11px]">
-                    COMMODITY & QUALITY SPECS
-                  </span>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Crop Commodity:</span>
-                    <span className="font-bold text-slate-100">{currentFarmer.product}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Certified Grade:</span>
-                    <span className="font-bold text-emerald-400">Grade A (AI Vision Passed)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Gross Vehicle Weight:</span>
-                    <span className="text-slate-200">{weighing.grossWeight} KG</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Tare Weight:</span>
-                    <span className="text-slate-200">{weighing.tareWeight} KG</span>
-                  </div>
-                  <div className="flex justify-between text-emerald-400 font-bold">
-                    <span>Net Billed Weight:</span>
-                    <span>{weighing.netWeight} KG</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Itemized Payout Breakdown Table */}
-              <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-950 text-slate-400 text-[10px] uppercase border-b border-slate-800">
-                    <tr>
-                      <th className="p-2.5">Item Description</th>
-                      <th className="p-2.5">Net Qty</th>
-                      <th className="p-2.5">MSP / Rate</th>
-                      <th className="p-2.5 text-right">Total Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800">
-                    <tr>
-                      <td className="p-2.5 font-semibold text-slate-200">
-                        {currentFarmer.product} (APMC Grade A Procurement)
-                      </td>
-                      <td className="p-2.5 text-slate-300">{weighing.netWeight} KG</td>
-                      <td className="p-2.5 text-slate-300">₹{decision.ratePerKg.toFixed(2)}/KG</td>
-                      <td className="p-2.5 text-right font-bold text-slate-100">
-                        ₹{(weighing.netWeight * decision.ratePerKg).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr className="text-slate-400 text-[11px]">
-                      <td className="p-2" colSpan={3}>APMC Mandi Fee & Market Cess (Direct Procurement Exemption)</td>
-                      <td className="p-2 text-right text-emerald-400">₹0.00 (Waived)</td>
-                    </tr>
-                    <tr className="text-slate-400 text-[11px]">
-                      <td className="p-2" colSpan={3}>Weighbridge & Quality Inspection Charge (Govt Subsidized)</td>
-                      <td className="p-2 text-right text-emerald-400">₹0.00 (Free)</td>
-                    </tr>
-                    <tr className="bg-emerald-950/40 font-bold text-xs sm:text-sm text-emerald-400 border-t-2 border-emerald-600">
-                      <td className="p-3" colSpan={2}>
-                        NET PAYABLE TO FARMER (DBT CREDIT):
-                      </td>
-                      <td className="p-3 text-right" colSpan={2}>
-                        ₹{decision.totalAmount.toLocaleString('en-IN')}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Settlement Status & Signatures */}
-              <div className="grid sm:grid-cols-3 gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800 items-center">
-                <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 block">Bank Settlement UTR:</span>
-                  <span className="text-[11px] font-bold text-emerald-400">AGRI-UTR-992817462019</span>
-                  <span className="text-[9px] text-slate-500 block">DBT Immediate Credit</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 block">Quality Assessor:</span>
-                  <span className="text-[11px] font-semibold text-slate-200">{profileData.name}</span>
-                  <span className="text-[9px] text-slate-500 block">License #{profileData.id}</span>
-                </div>
-                <div className="text-center sm:text-right">
-                  <span className="inline-block px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-600 rounded-full font-bold text-[10px]">
-                    ✓ DIGITALLY SIGNED & VERIFIED
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="bg-slate-900 border-t border-slate-800 p-4 flex flex-wrap gap-2 justify-end">
+            <div className="flex gap-2">
               <button
                 onClick={() => {
                   window.print();
+                  showToast('Official receipt printed successfully.');
                 }}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs cursor-pointer uppercase"
               >
-                <Printer className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Print Receipt</span>
+                {at('btnPrintReceipt')}
               </button>
               <button
                 onClick={() => {
-                  showToast(`Invoice PDF REC-2026-${decision.purchaseId}.pdf downloaded successfully.`);
+                  setShowReceiptModal(false);
+                  setSelectedTxnForReceipt(null);
                 }}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-lg"
+                className="py-2.5 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download Invoice PDF</span>
-              </button>
-              <button
-                onClick={() => setShowDigitalReceipt(false)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-4 py-2 rounded-xl text-xs cursor-pointer"
-              >
-                Close
+                {at('btnCloseReceipt')}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ============================================================================ */}
-      {/* 4 WORKABLE HISTORICAL RECORDS MODALS (Quality, Weighbridge, Payments, Photo)  */}
-      {/* ============================================================================ */}
-      {activeHistoryModal && selectedFarmerProfile && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl w-full max-w-3xl text-slate-100 shadow-2xl relative overflow-hidden font-mono text-xs my-auto">
-            {/* Modal Header */}
-            <div className="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-emerald-400 flex items-center gap-2">
-                  {activeHistoryModal === 'quality' && <span>📁 Quality Inspection Reports Archive</span>}
-                  {activeHistoryModal === 'weighbridge' && <span>📜 Weighbridge Scale Tickets History</span>}
-                  {activeHistoryModal === 'payments' && <span>💳 Direct Benefit Transfer (DBT) Ledger</span>}
-                  {activeHistoryModal === 'photo' && <span>🖼️ High-Resolution AI Photo Evidence</span>}
-                </h3>
-                <p className="text-[11px] text-slate-400 font-sans mt-0.5">
-                  Farmer: <strong className="text-slate-200">{selectedFarmerProfile.name}</strong> • ID:{' '}
-                  <strong className="text-emerald-400">{selectedFarmerProfile.id}</strong> • Village:{' '}
-                  {selectedFarmerProfile.village}
-                </p>
-              </div>
-              <button
-                onClick={() => setActiveHistoryModal(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-4 sm:p-6 max-h-[70vh] overflow-y-auto space-y-4">
-              {/* CASE 1: QUALITY REPORTS ARCHIVE */}
-              {activeHistoryModal === 'quality' && (
-                <div className="overflow-x-auto rounded-xl border border-slate-800">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-900 text-slate-400 text-[10px] uppercase border-b border-slate-800">
-                      <tr>
-                        <th className="p-2.5">Report ID</th>
-                        <th className="p-2.5">Date</th>
-                        <th className="p-2.5">Crop</th>
-                        <th className="p-2.5">Rotten %</th>
-                        <th className="p-2.5">Damage %</th>
-                        <th className="p-2.5">Foreign %</th>
-                        <th className="p-2.5">Score</th>
-                        <th className="p-2.5">Grade</th>
-                        <th className="p-2.5">Inspector</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800 text-[11px]">
-                      {selectedFarmerProfile.qualityReports?.map((r) => (
-                        <tr key={r.id} className="hover:bg-slate-900">
-                          <td className="p-2.5 font-bold text-emerald-400">{r.id}</td>
-                          <td className="p-2.5 text-slate-400">{r.date}</td>
-                          <td className="p-2.5 font-semibold text-slate-200">{r.crop}</td>
-                          <td className="p-2.5 text-emerald-300">{r.rotten}</td>
-                          <td className="p-2.5 text-slate-300">{r.damaged}</td>
-                          <td className="p-2.5 text-slate-300">{r.foreign}</td>
-                          <td className="p-2.5 font-bold text-purple-400">{r.score}/100</td>
-                          <td className="p-2.5">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                r.grade === 'Rejected'
-                                  ? 'bg-red-950 text-red-300 border border-red-600'
-                                  : 'bg-emerald-950 text-emerald-300 border border-emerald-600'
-                              }`}
-                            >
-                              {r.grade}
-                            </span>
-                          </td>
-                          <td className="p-2.5 text-slate-400 font-sans text-[10px]">{r.inspector}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* CASE 2: WEIGHBRIDGE HISTORY */}
-              {activeHistoryModal === 'weighbridge' && (
-                <div className="overflow-x-auto rounded-xl border border-slate-800">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-900 text-slate-400 text-[10px] uppercase border-b border-slate-800">
-                      <tr>
-                        <th className="p-2.5">Slip Ticket No</th>
-                        <th className="p-2.5">Date</th>
-                        <th className="p-2.5">Gross (KG)</th>
-                        <th className="p-2.5">Tare (KG)</th>
-                        <th className="p-2.5">Net Billed (KG)</th>
-                        <th className="p-2.5">Rate/KG</th>
-                        <th className="p-2.5">Amount Disbursed</th>
-                        <th className="p-2.5">Scale ID</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800 text-[11px]">
-                      {selectedFarmerProfile.weighbridgeHistory?.map((w) => (
-                        <tr key={w.id} className="hover:bg-slate-900">
-                          <td className="p-2.5 font-bold text-blue-400">{w.id}</td>
-                          <td className="p-2.5 text-slate-400">{w.date}</td>
-                          <td className="p-2.5 text-slate-300">{w.gross} kg</td>
-                          <td className="p-2.5 text-slate-400">{w.tare} kg</td>
-                          <td className="p-2.5 font-bold text-emerald-400">{w.net} kg</td>
-                          <td className="p-2.5 text-slate-300">₹{w.rate.toFixed(2)}</td>
-                          <td className="p-2.5 font-bold text-slate-100">₹{w.amount.toLocaleString('en-IN')}</td>
-                          <td className="p-2.5 text-slate-400">{w.scale}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* CASE 3: PAYMENTS LEDGER */}
-              {activeHistoryModal === 'payments' && (
-                <div className="overflow-x-auto rounded-xl border border-slate-800">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-900 text-slate-400 text-[10px] uppercase border-b border-slate-800">
-                      <tr>
-                        <th className="p-2.5">Bank UTR Ref</th>
-                        <th className="p-2.5">Date</th>
-                        <th className="p-2.5">Amount</th>
-                        <th className="p-2.5">Mode</th>
-                        <th className="p-2.5">Target Bank</th>
-                        <th className="p-2.5">Settlement Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800 text-[11px]">
-                      {selectedFarmerProfile.paymentsLedger?.map((p) => (
-                        <tr key={p.utr} className="hover:bg-slate-900">
-                          <td className="p-2.5 font-bold text-purple-400 truncate max-w-[140px]">{p.utr}</td>
-                          <td className="p-2.5 text-slate-400">{p.date}</td>
-                          <td className="p-2.5 font-bold text-emerald-400">₹{p.amount.toLocaleString('en-IN')}</td>
-                          <td className="p-2.5 text-slate-300">{p.mode}</td>
-                          <td className="p-2.5 text-slate-300">{p.bank}</td>
-                          <td className="p-2.5">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-600">
-                              ✓ {p.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* CASE 4: PHOTO EVIDENCE REPOSITORY */}
-              {activeHistoryModal === 'photo' && (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {selectedFarmerProfile.photoEvidence?.map((e) => (
-                    <div key={e.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden p-3 space-y-2">
-                      <div className="aspect-video bg-slate-950 rounded-lg overflow-hidden border border-slate-800 relative">
-                        <img src={e.url} alt={e.title} className="w-full h-full object-cover" />
-                        <span className="absolute bottom-1 right-1 bg-slate-950/80 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded font-mono">
-                          {e.id}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-slate-200 block text-xs">{e.title}</span>
-                        <span className="text-[10px] text-slate-500 block font-mono">{e.date}</span>
-                        <p className="text-[11px] text-slate-400 font-sans mt-1 bg-slate-950/60 p-2 rounded border border-slate-800/80">
-                          {e.defect}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="bg-slate-900 border-t border-slate-800 p-4 flex justify-between items-center">
-              <span className="text-[10px] text-slate-500">
-                Official Government APMC Procurement Archive • Validated via NABL Weighbridge WS-04
-              </span>
-              <button
-                onClick={() => setActiveHistoryModal(null)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-4 py-2 rounded-xl text-xs cursor-pointer"
-              >
-                Close Archive
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================================ */}
-      {/* FLOATING STATUS TOAST NOTIFICATION                                           */}
-      {/* ============================================================================ */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 border border-emerald-500 text-emerald-300 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in text-xs font-semibold">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
-          <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-white ml-2">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

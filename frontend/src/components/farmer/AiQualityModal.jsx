@@ -23,7 +23,7 @@ import { LanguageContext } from '../../context/LanguageContext';
 export default function AiQualityModal({ isOpen, onClose }) {
   const { t } = useContext(LanguageContext);
 
-  const [selectedCrop, setSelectedCrop] = useState('Potato');
+  const [selectedCrop, setSelectedCrop] = useState('Paddy');
   const [analyzing, setAnalyzing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(true);
   const [useCameraStream, setUseCameraStream] = useState(false);
@@ -46,39 +46,34 @@ export default function AiQualityModal({ isOpen, onClose }) {
   // Benchmark Datasets for Instant Testing
   const benchmarkSamples = [
     {
-      id: 'pot-a',
-      name: 'Grade A Potato (Uniform)',
-      crop: 'Potato',
-      url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=80',
-      expectedScore: 87
-    },
-    {
-      id: 'pot-scab',
-      name: 'Potato (Surface Scab & Blemish)',
-      crop: 'Potato',
-      url: 'https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=600&auto=format&fit=crop&q=80',
-      expectedScore: 68
-    },
-    {
       id: 'rice-a',
-      name: 'Golden Paddy Rice (Grade A)',
-      crop: 'Rice',
+      name: 'Golden Paddy (Grade A)',
+      crop: 'Paddy',
+      dataset: 'Kaggle Rice Grain Quality & Purity Benchmark',
       url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80',
-      expectedScore: 92
+      expectedScore: 96,
+      moistureEstimate: '11.5%',
+      grade: 'Grade A'
     },
     {
-      id: 'tom-ripe',
-      name: 'Fresh Red Tomato (Grade A)',
-      crop: 'Tomato',
-      url: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80',
-      expectedScore: 89
+      id: 'rice-discolor',
+      name: 'Paddy (Discolored / High Moisture)',
+      crop: 'Paddy',
+      dataset: 'Kaggle Rice Leaf & Grain Defect Dataset',
+      url: 'https://images.unsplash.com/photo-1536304929831-ee1ca9d44906?w=600&auto=format&fit=crop&q=80',
+      expectedScore: 74,
+      moistureEstimate: '15.8%',
+      grade: 'Grade B'
     },
     {
-      id: 'tom-blemish',
-      name: 'Overripe Bruised Tomato',
-      crop: 'Tomato',
-      url: 'https://images.unsplash.com/photo-1546470427-e26264be0b11?w=600&auto=format&fit=crop&q=80',
-      expectedScore: 64
+      id: 'wheat-a',
+      name: 'Golden Wheat (FAQ Standard)',
+      crop: 'Wheat',
+      dataset: 'Kaggle Wheat Grain Quality Benchmark',
+      url: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=80',
+      expectedScore: 95,
+      moistureEstimate: '11.2%',
+      grade: 'Grade A'
     }
   ];
 
@@ -303,7 +298,7 @@ export default function AiQualityModal({ isOpen, onClose }) {
       }
 
       // Benchmark prices
-      const basePrices = { Potato: 12, Rice: 28, Tomato: 18, Onion: 22, Wheat: 26 };
+      const basePrices = { Paddy: 23.69, Rice: 23.69, Wheat: 24.25 };
       const baseMandi = basePrices[cropName] || 12;
       const estimatedRate = (baseMandi * mandiRateMultiplier).toFixed(2);
 
@@ -421,17 +416,17 @@ export default function AiQualityModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-emerald-500/30 rounded-3xl p-5 sm:p-7 text-white shadow-2xl my-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-white/95 backdrop-blur-2xl border border-white/80 rounded-3xl p-5 sm:p-7 text-slate-800 shadow-2xl my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono tracking-wider text-emerald-400 font-bold uppercase bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+              <span className="text-[11px] font-mono tracking-wider text-emerald-700 font-bold uppercase bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                 AgriVision-MobileNet AI v2.6 • Active CV Model
               </span>
             </div>
-            <h2 className="text-xl font-black text-white flex items-center gap-2 mt-1">
+            <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 mt-1">
               <span>🤖</span> {t('aiQualityCheck')}
             </h2>
           </div>
@@ -440,7 +435,7 @@ export default function AiQualityModal({ isOpen, onClose }) {
               stopCamera();
               onClose();
             }}
-            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer"
+            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -453,8 +448,8 @@ export default function AiQualityModal({ isOpen, onClose }) {
               onClick={startCamera}
               className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
                 useCameraStream
-                  ? 'bg-red-600 text-white animate-pulse'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                  ? 'bg-rose-600 text-white animate-pulse'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
               }`}
             >
               <Camera className="w-4 h-4" />
@@ -463,7 +458,7 @@ export default function AiQualityModal({ isOpen, onClose }) {
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
             >
               <Upload className="w-4 h-4" />
               <span>Upload Real Photo</span>
@@ -478,8 +473,8 @@ export default function AiQualityModal({ isOpen, onClose }) {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-400 text-[11px]">Crop:</span>
-            {['Potato', 'Rice', 'Tomato'].map((c) => (
+            <span className="text-slate-500 text-[11px] font-semibold">Crop:</span>
+            {['Paddy', 'Wheat'].map((c) => (
               <button
                 key={c}
                 onClick={() => {
@@ -488,19 +483,19 @@ export default function AiQualityModal({ isOpen, onClose }) {
                 }}
                 className={`px-2.5 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                   selectedCrop === c
-                    ? 'bg-emerald-500 text-slate-950'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-750'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
                 }`}
               >
-                {c === 'Potato' ? '🥔 Potato' : c === 'Rice' ? '🌾 Rice' : '🍅 Tomato'}
+                {c === 'Paddy' ? '🌾 Paddy' : '🌾 Wheat'}
               </button>
             ))}
           </div>
         </div>
 
         {cameraError && (
-          <div className="mt-3 p-3 bg-red-500/20 border border-red-500/40 text-red-300 text-xs rounded-xl flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+          <div className="mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-500" />
             <span>{cameraError}</span>
           </div>
         )}
@@ -515,7 +510,7 @@ export default function AiQualityModal({ isOpen, onClose }) {
             <div className="absolute bottom-4 inset-x-0 flex justify-center gap-3">
               <button
                 onClick={captureCameraFrame}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-xl flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xl flex items-center gap-2 cursor-pointer"
               >
                 <Camera className="w-4 h-4" />
                 <span>Snap & Run AI Vision Analysis</span>
@@ -532,14 +527,14 @@ export default function AiQualityModal({ isOpen, onClose }) {
 
         {/* Canvas Display with AI Visual Detection Overlay */}
         {!useCameraStream && (
-          <div className="mt-4 relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 shadow-inner flex flex-col items-center">
+          <div className="mt-4 relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 shadow-inner flex flex-col items-center">
             <canvas
               ref={canvasRef}
               className="max-h-[260px] w-auto max-w-full object-contain mx-auto"
             />
 
             {/* Overlay toggle & AI HUD bar */}
-            <div className="w-full p-2.5 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono">
+            <div className="w-full p-2.5 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-white">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-emerald-400 font-bold">
@@ -551,8 +546,8 @@ export default function AiQualityModal({ isOpen, onClose }) {
                 onClick={() => setShowOverlay(!showOverlay)}
                 className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase transition-all cursor-pointer ${
                   showOverlay
-                    ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/50'
-                    : 'bg-white/5 text-slate-400 border border-slate-800'
+                    ? 'bg-emerald-600/40 text-emerald-300 border border-emerald-400/60'
+                    : 'bg-white/10 text-slate-400 border border-slate-700'
                 }`}
               >
                 {showOverlay ? 'AI Defect Bounding Boxes: ON' : 'AI Overlay: OFF'}
@@ -563,7 +558,7 @@ export default function AiQualityModal({ isOpen, onClose }) {
 
         {/* Benchmark Quick Testing Dataset Strip */}
         <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">
+          <span className="text-[11px] text-slate-500 font-bold whitespace-nowrap">
             Test Benchmarks:
           </span>
           {benchmarkSamples.map((sample) => (
@@ -577,8 +572,8 @@ export default function AiQualityModal({ isOpen, onClose }) {
               }}
               className={`px-2.5 py-1 rounded-lg whitespace-nowrap text-[11px] font-bold transition-all cursor-pointer border ${
                 imageSrc === sample.url
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/60'
-                  : 'bg-slate-800/80 text-slate-400 hover:text-slate-200 border-slate-700/60'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200'
               }`}
             >
               {sample.name}
@@ -588,32 +583,32 @@ export default function AiQualityModal({ isOpen, onClose }) {
 
         {/* AI MODEL INFERENCE OUTPUT (Page 4 Layout) */}
         {analyzing ? (
-          <div className="mt-4 p-6 rounded-2xl bg-slate-950 border border-emerald-500/40 text-center space-y-2">
-            <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin mx-auto" />
-            <p className="text-sm font-extrabold text-emerald-300">
+          <div className="mt-4 p-6 rounded-2xl bg-emerald-50/50 border border-emerald-200 text-center space-y-2">
+            <RefreshCw className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+            <p className="text-sm font-extrabold text-emerald-800">
               Running Morphometric & Color Segmentation Pipeline...
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Scanning RGBA pixel buffer for blemish clustering, specular highlights, and surface moisture.
             </p>
           </div>
         ) : analysisResult ? (
-          <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-slate-950 border border-emerald-500/40 space-y-3.5 animate-fade-in">
+          <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-emerald-50/40 border border-emerald-200/80 space-y-3.5 animate-fade-in">
             {/* Top Grade Header */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
               <div>
-                <span className="text-[10px] uppercase font-mono text-emerald-400 tracking-wider block font-bold">
+                <span className="text-[10px] uppercase font-mono text-emerald-700 tracking-wider block font-bold">
                   Vision Classification
                 </span>
-                <h4 className="text-xl font-black text-emerald-300 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-emerald-400" />
+                <h4 className="text-xl font-black text-emerald-900 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-emerald-600" />
                   <span>{analysisResult.grade}</span>
                 </h4>
               </div>
 
               <div className="text-right">
-                <span className="text-xs text-slate-400 block font-mono">Quality Score</span>
-                <span className="text-3xl font-black text-amber-400 font-mono">
+                <span className="text-xs text-slate-500 block font-mono">Quality Score</span>
+                <span className="text-3xl font-black text-amber-600 font-mono">
                   {analysisResult.score}/100
                 </span>
               </div>
@@ -621,49 +616,49 @@ export default function AiQualityModal({ isOpen, onClose }) {
 
             {/* Metrics Grid specified in Page 4 of PDF */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-              <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-slate-400 block font-medium">Size</span>
-                <span className="text-sm font-black text-emerald-400 mt-0.5 block">
+              <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
+                <span className="text-slate-500 block font-medium">Size</span>
+                <span className="text-sm font-black text-emerald-700 mt-0.5 block">
                   {analysisResult.size}
                 </span>
               </div>
-              <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-slate-400 block font-medium">Colour</span>
-                <span className="text-sm font-black text-emerald-400 mt-0.5 block">
+              <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
+                <span className="text-slate-500 block font-medium">Colour</span>
+                <span className="text-sm font-black text-emerald-700 mt-0.5 block">
                   {analysisResult.colour}
                 </span>
               </div>
-              <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-slate-400 block font-medium">Moisture</span>
-                <span className="text-sm font-black text-white mt-0.5 block font-mono">
+              <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
+                <span className="text-slate-500 block font-medium">Moisture</span>
+                <span className="text-sm font-black text-slate-800 mt-0.5 block font-mono">
                   {analysisResult.moisture}
                 </span>
               </div>
-              <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-slate-400 block font-medium">Foreign Matter</span>
-                <span className="text-sm font-black text-white mt-0.5 block font-mono">
+              <div className="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
+                <span className="text-slate-500 block font-medium">Foreign Matter</span>
+                <span className="text-sm font-black text-slate-800 mt-0.5 block font-mono">
                   {analysisResult.foreignMatter}
                 </span>
               </div>
             </div>
 
             {/* Valuation & Defect Details */}
-            <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
-              <div className="flex items-center gap-2 text-slate-300">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <div className="p-3 bg-white rounded-xl border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono shadow-xs">
+              <div className="flex items-center gap-2 text-slate-700">
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
                 <span>
                   Expected Mandi Rate:{' '}
-                  <strong className="text-emerald-300 text-sm">{analysisResult.estimatedRate}</strong>
+                  <strong className="text-emerald-700 text-sm">{analysisResult.estimatedRate}</strong>
                 </span>
               </div>
-              <div className="text-slate-400">
-                Defect Surface Ratio: <strong className="text-amber-300">{analysisResult.defectPct}</strong> ({analysisResult.blemishes?.length || 0} spots detected)
+              <div className="text-slate-500">
+                Defect Surface Ratio: <strong className="text-amber-700">{analysisResult.defectPct}</strong> ({analysisResult.blemishes?.length || 0} spots detected)
               </div>
             </div>
 
             {/* Advisory disclaimer from Page 4 of PDF */}
-            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200 flex items-start gap-2">
-              <Info className="w-4 h-4 flex-shrink-0 text-amber-400 mt-0.5" />
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+              <Info className="w-4 h-4 flex-shrink-0 text-amber-600 mt-0.5" />
               <span>
                 <strong>(Advisory estimate, non-official).</strong> Size: {analysisResult.size}, Colour: {analysisResult.colour}. Verified grade will be confirmed upon weighing at procurement centre.
               </span>
@@ -672,13 +667,13 @@ export default function AiQualityModal({ isOpen, onClose }) {
         ) : null}
 
         {/* Footer */}
-        <div className="mt-5 pt-3 border-t border-slate-800 flex justify-end">
+        <div className="mt-5 pt-3 border-t border-slate-100 flex justify-end">
           <button
             onClick={() => {
               stopCamera();
               onClose();
             }}
-            className="py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs cursor-pointer transition-all"
+            className="py-2.5 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-all border border-slate-200"
           >
             Close
           </button>

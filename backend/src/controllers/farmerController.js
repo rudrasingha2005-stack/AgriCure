@@ -127,3 +127,16 @@ exports.scanCropQuality = async (req, res) => {
   }
 };
 
+const { handleFarmerQuery } = require('../services/aiChatService');
+
+exports.aiChatAssistant = async (req, res) => {
+  try {
+    const { query, language = 'en' } = req.body;
+    if (!query) return res.status(400).json({ message: 'Query is required' });
+    const response = await handleFarmerQuery(query, language);
+    res.json(response);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+

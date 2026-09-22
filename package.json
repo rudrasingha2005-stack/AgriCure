@@ -1,7 +1,7 @@
 {
-  "name": "agriprocure",
+  "name": "agrisetu",
   "version": "1.0.0",
-  "description": "AgriProcure - Decentralized Agricultural Procurement & Farmer Portal",
+  "description": "AgriSetu - Decentralized Agricultural Procurement & Farmer Portal",
   "private": true,
   "main": "start.js",
   "scripts": {

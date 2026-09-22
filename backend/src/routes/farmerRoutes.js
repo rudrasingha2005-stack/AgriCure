@@ -19,4 +19,5 @@ router.get('/announcements', c.getAnnouncements);
 router.post('/feedback', c.submitFeedback);
 router.post('/allegations', upload.single('proof'), c.submitAllegation);
 router.post('/ai-scan', upload.single('cropImage'), c.scanCropQuality);
+router.post('/chat', c.aiChatAssistant);
 module.exports = router;

@@ -1,7 +1,7 @@
 @echo off
-title AgriProcure App Runner
+title AgriSetu App Runner
 echo ========================================================
-echo Starting AgriProcure Unified Runner...
+echo Starting AgriSetu Unified Runner...
 echo ========================================================
 node start.js
 pause

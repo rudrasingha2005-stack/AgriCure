@@ -5,14 +5,14 @@ const isWin = process.platform === 'win32';
 const npmCmd = isWin ? 'npm.cmd' : 'npm';
 
 console.log('========================================================');
-console.log('🌱 AgriProcure Unified Runner');
+console.log('🌱 AgriSetu Unified Runner');
 console.log('========================================================');
 console.log('Backend running at:  http://localhost:5000');
 console.log('Frontend running at: http://localhost:5173');
 console.log('Demo Credentials:');
-console.log('  - Farmer:       9876543210       / password123');
-console.log('  - Company:      company@test.com / password123');
-console.log('  - Professional: pro@test.com     / password123');
+console.log('  - Farmer:       9876543210       / AgriSetu@2025');
+console.log('  - Company:      company@test.com / AgriSetu@2025');
+console.log('  - Professional: pro@test.com     / AgriSetu@2025');
 console.log('========================================================\n');
 
 const backend = spawn(npmCmd, ['run', 'dev'], {
@@ -28,7 +28,7 @@ const frontend = spawn(npmCmd, ['run', 'dev'], {
 });
 
 function cleanup() {
-  console.log('\nStopping AgriProcure servers...');
+  console.log('\nStopping AgriSetu servers...');
   try { backend.kill(); } catch (e) {}
   try { frontend.kill(); } catch (e) {}
   process.exit();

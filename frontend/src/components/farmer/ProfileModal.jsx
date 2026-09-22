@@ -29,93 +29,93 @@ export default function ProfileModal({ isOpen, onClose, farmerData }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="relative w-full max-w-lg bg-slate-900 border border-emerald-500/30 rounded-3xl p-5 sm:p-7 text-white shadow-2xl my-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-white/95 backdrop-blur-2xl border border-white/80 rounded-3xl p-5 sm:p-7 text-slate-800 shadow-2xl my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
-            <span className="text-[11px] font-mono tracking-wider text-emerald-400 font-bold uppercase">
-              PDF Section 6: Profile & Settings
+            <span className="text-[11px] font-mono tracking-wider text-emerald-700 font-bold uppercase bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              {t('pdfSection6')}
             </span>
-            <h2 className="text-xl font-black text-white flex items-center gap-2">
-              <User className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 mt-1">
+              <User className="w-5 h-5 text-emerald-600" />
               <span>{t('profile')}</span>
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer"
+            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Farmer Identification Card (Page 4) */}
-        <div className="mt-4 p-5 rounded-2xl bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/40 space-y-3">
+        <div className="mt-4 p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50/70 border border-emerald-200 space-y-3 shadow-xs">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600/30 border border-emerald-400/50 flex items-center justify-center text-2xl font-bold text-emerald-300">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl font-bold shadow-md shadow-emerald-600/20">
                 👨‍🌾
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">
+                <h3 className="text-lg font-black text-slate-900">
                   {farmerData?.name || 'Ramesh Das'}
                 </h3>
-                <span className="text-xs font-mono font-bold text-emerald-400">
+                <span className="text-xs font-mono font-bold text-emerald-700">
                   ID: {farmerData?.farmerId || 'FMR-001245'}
                 </span>
               </div>
             </div>
-            <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" /> Verified
+            <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" /> {t('verified')}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800 text-xs">
-            <div className="flex items-center gap-1.5 text-slate-300">
-              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-emerald-200/60 text-xs">
+            <div className="flex items-center gap-1.5 text-slate-700">
+              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
               <span>{farmerData?.district || 'Darjeeling'}, {farmerData?.state || 'West Bengal'}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-slate-300">
-              <Phone className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="flex items-center gap-1.5 text-slate-700">
+              <Phone className="w-3.5 h-3.5 text-emerald-600" />
               <span>+91 {farmerData?.phone || '9876543210'}</span>
             </div>
           </div>
         </div>
 
         {/* Linked Bank Details (Page 4 of PDF) */}
-        <div className="mt-4 p-4 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-2 text-xs">
+        <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-slate-300 flex items-center gap-1.5">
-              <CreditCard className="w-4 h-4 text-emerald-400" /> Linked Bank Account
+            <span className="font-bold text-slate-700 flex items-center gap-1.5">
+              <CreditCard className="w-4 h-4 text-emerald-600" /> {t('linkedBank')}
             </span>
-            <span className="text-emerald-400 font-extrabold flex items-center gap-1 text-[11px]">
-              <CheckCircle2 className="w-3.5 h-3.5" /> NPCI / PFMS Linked
+            <span className="text-emerald-700 font-extrabold flex items-center gap-1 text-[11px]">
+              <CheckCircle2 className="w-3.5 h-3.5" /> {t('npciPfms')}
             </span>
           </div>
-          <div className="p-3 bg-slate-900 rounded-xl space-y-1 font-mono">
-            <div className="flex justify-between text-slate-400">
-              <span>Bank Name:</span>
-              <span className="text-white font-semibold">State Bank of India (SBI)</span>
+          <div className="p-3 bg-white rounded-xl space-y-1 font-mono border border-slate-200/80">
+            <div className="flex justify-between text-slate-500">
+              <span>{t('bankName')}</span>
+              <span className="text-slate-900 font-semibold">State Bank of India (SBI)</span>
             </div>
-            <div className="flex justify-between text-slate-400">
-              <span>Account Number:</span>
-              <span className="text-white font-semibold">XXXX XXXX 4582</span>
+            <div className="flex justify-between text-slate-500">
+              <span>{t('accountNumber')}</span>
+              <span className="text-slate-900 font-semibold">XXXX XXXX 4582</span>
             </div>
-            <div className="flex justify-between text-slate-400">
-              <span>IFSC Code:</span>
-              <span className="text-white font-semibold">SBIN0001234</span>
+            <div className="flex justify-between text-slate-500">
+              <span>{t('ifscCode')}</span>
+              <span className="text-slate-900 font-semibold">SBIN0001234</span>
             </div>
           </div>
         </div>
 
         {/* Multilingual Support Toggle (Page 4 of PDF) */}
-        <div className="mt-4 p-4 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-2.5">
+        <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <Globe className="w-4 h-4 text-emerald-400" /> App Language
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Globe className="w-4 h-4 text-emerald-600" /> {t('appLanguage')}
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">Instant toggle</span>
+            <span className="text-[11px] text-slate-500 font-medium">{t('instantToggle')}</span>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
@@ -129,8 +129,8 @@ export default function ProfileModal({ isOpen, onClose, farmerData }) {
                 onClick={() => setLanguage(lang.code)}
                 className={`py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
                   language === lang.code
-                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400'
-                    : 'bg-slate-900 text-slate-300 hover:bg-slate-850 border border-slate-700'
+                    ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
                 {lang.label}
@@ -140,10 +140,10 @@ export default function ProfileModal({ isOpen, onClose, farmerData }) {
         </div>
 
         {/* Logout Action */}
-        <div className="mt-5 pt-4 border-t border-slate-800 flex justify-between items-center">
+        <div className="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
           <button
             onClick={handleLogout}
-            className="py-2 px-4 rounded-xl bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            className="py-2 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>{t('logout')}</span>
@@ -151,9 +151,9 @@ export default function ProfileModal({ isOpen, onClose, farmerData }) {
 
           <button
             onClick={onClose}
-            className="py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs cursor-pointer transition-all"
+            className="py-2.5 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-all border border-slate-200"
           >
-            Done
+            {t('done')}
           </button>
         </div>
       </div>

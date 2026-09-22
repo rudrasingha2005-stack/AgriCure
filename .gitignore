@@ -40,3 +40,33 @@ backend/uploads/
 *.zip
 *.rar
 New WinRAR ZI...*
+
+.vercel
+.env*
+# 1. Environment Variables & Secrets
+.env
+.env.local
+*.env
+
+# 2. Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# 3. Build Outputs
+frontend/dist/
+dist/
+
+# 4. Large Files & Archives
+*.zip
+*.rar
+"New WinRAR ZIP archive.zip"
+
+# 5. User Uploads
+uploads/
+backend/uploads/
+
+# 6. Logs & OS Junk
+*.log
+.DS_Store
+Thumbs.db
